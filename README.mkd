@@ -1,12 +1,10 @@
-<style>body {width: 500px}</style>
-
 Manga ChapterReader
 ===================
 
 A Userscript for [mangareader.net](http://mangareader.net) which loads a full
 chapter for easier reading. It uses [jQuery](http://jquery.com) and works in
 (AFAIK) Firefox 3.6+ (Greasemonkey), Firefox 4b+ (Scriptish), and Chromium
-(tested in 9+). It is checked for quality using Crockford's [JSLint](http://jslint.com).
+(tested in 9+).
 
 It displays the full chapter in a simple monochrome interface with many options,
 including the ability to cache already visited chapters for faster loading,
@@ -18,11 +16,7 @@ the site's own ads at the bottom of the page. Of course, this behaviour can be
 disabled too.
 
 Mangareader.net has undergone a redesign not long ago, and some of its manga kept
-the old URL format; this script can cater for both without any problems. It is
-actively maintained, with two editions available: a stable, but somewhat outdated,
-script available on [userscripts.org](http://userscripts.org/scripts/show/83107),
-and the [bleeding edge](http://passcod.cz.cc/pages/manga-chapterreader), which
-has new features but may be unstable.
+the old URL format; this script can cater for both without any problems.
 
 It does not yet offer a manga dropdown (like OneManga Full Chapter Reader did),
 but that may be coming sooner or later. For the moment, you have to manually
@@ -39,11 +33,17 @@ Here is a changelog of the versions which were released from the beginning
 onwards. The version format is y.z: e.g. 10.354 is was released on the 354th day
 of 2010. The `.edge` versions are bleeding edge only.
 
+<hr />
+
+Old [Hg] Versions
+=================
+
 11.1
 ----
 
 * STABLE
 * Fixed: Chapter reset when using both select and prev/next.
+* Last version in Hg repo.
 
 10.360.edge
 -----------
