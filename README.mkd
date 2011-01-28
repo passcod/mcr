@@ -1,0 +1,182 @@
+<style>body {width: 500px}</style>
+
+Manga ChapterReader
+===================
+
+A Userscript for [mangareader.net](http://mangareader.net) which loads a full
+chapter for easier reading. It uses [jQuery](http://jquery.com) and works in
+(AFAIK) Firefox 3.6+ (Greasemonkey), Firefox 4b+ (Scriptish), and Chromium
+(tested in 9+). It is checked for quality using Crockford's [JSLint](http://jslint.com).
+
+It displays the full chapter in a simple monochrome interface with many options,
+including the ability to cache already visited chapters for faster loading,
+changing the background colour from white to black, toggling hotkeys, and forcing
+the image width to 800 pixels (for small/laptop screens).
+
+It is the only script of its kind to indirectly support the manga site, by displaying
+the site's own ads at the bottom of the page. Of course, this behaviour can be
+disabled too.
+
+Mangareader.net has undergone a redesign not long ago, and some of its manga kept
+the old URL format; this script can cater for both without any problems. It is
+actively maintained, with two editions available: a stable, but somewhat outdated,
+script available on [userscripts.org](http://userscripts.org/scripts/show/83107),
+and the [bleeding edge](http://passcod.cz.cc/pages/manga-chapterreader), which
+has new features but may be unstable.
+
+It does not yet offer a manga dropdown (like OneManga Full Chapter Reader did),
+but that may be coming sooner or later. For the moment, you have to manually
+browse the manga site and find your manga. There are many features in the works,
+most only at the design stage yet, but if you really want a feature or a fix as
+soon as possible, the best way is to [file a ticket](https://bitbucket.org/passcod/scrap.book/issues/).
+
+A userbase survey was conducted in December 2010, which data is still available
+[here](http://passcod.cz.cc/items/survey.php). The main conclusion to be drawn 
+is that there is on average a hundred people using the script every day. It's not
+bad!
+
+Here is a changelog of the versions which were released from the beginning
+onwards. The version format is y.z: e.g. 10.354 is was released on the 354th day
+of 2010. The `.edge` versions are bleeding edge only.
+
+11.1
+----
+
+* STABLE
+* Fixed: Chapter reset when using both select and prev/next.
+
+10.360.edge
+-----------
+
+* Options reset.
+* Listing of cache contents and sizes, including % used.
+
+
+10.354.edge
+-----------
+
+* Better status display.
+* Ads: support mangareader.net
+* Removed Preloading option.
+* Cleaner caching.
+* No more /$*.^/ problem
+* Namespaced
+
+10.337
+------
+
+* STABLE (ish) RELEASE 
+* For the bleeding edge, go to [http://passcod.cz.cc/pages/manga-chapterreader] 
+* There will be no further development for a while after this release.
+Eventually, when the bleeding edge will start to stabilize, I will merge it to stable.
+
+10.336
+------
+
+* Mangalink -- link to manga description page 
+* Full resolution for large images (option) 
+* Page list caching -- so going back a chapter takes very little loading time. 
+
+10.335
+------
+
+* Permalink -- link to the current chapter. Can act as a bookmark. 
+* 'Show First' option -- Show the first page of the chapter while loading it. 
+* Fix concerning the color. I tested it on XP and realised you couldn't see the
+  buttons' text in black mode... sorry! 
+* See https://bitbucket.org/passcod/scrap.book/ for details.
+
+10.333
+------
+
+Many changes, including a new 'Options' panel, persistent options, better chapter listing, etc. 
+
+10.331b
+-------
+
+* Achieved compatibility with Firefox 3.x and Chromium (nightlies).
+
+10.331
+------
+
+* All old features are now implemented. 
+* Recognizes old URLs and redirects to new.
+
+10.330b
+-------
+
+* Using jQuery 1.4.2 instead of the latest (1.4.4)
+
+10.330
+------
+
+* Implemented basic features: loads all pages in the chapter.
+
+10.329
+------
+
+* Complete rewrite. Doesn't work yet.
+
+10.300
+------
+
+* Server hosting jQuery shut down, now uses another one. Hope it works.
+
+10.227c
+-------
+
+* Fixed: Last chapter alert said 'first'. 
+* Now silently fails when not on chapter page. 
+* Fixed: The script was silently failing when firebug was not open (on my linux box with a daily).
+
+10.227b
+-------
+
+* Chapters are now loaded using XHR.
+
+10.227
+------
+
+* Changed Chapter select 
+* Now all page changes are done through js, not links (preparing for ajax). 
+* Title is simplified
+
+10.226b
+-------
+
+* Fixed: typo in @require stopped script from installing
+
+10.226
+------
+
+* Shortened navbar 
+* Now uses jQuery (own hosted version) 
+* Can switch between black and white
+
+10.225
+------
+
+* Have fixed navbar instead of top/bottom links.
+
+Roadmap
+=======
+
+(from 10.354)
+
+* __10.354 [DONE]__ Minor Rewrite: Namespace, full support for old URLs, separate
+  cache from options, erase broken Preloading trial and introduced variables.
+
+* __10.360 [DONE]__ Better chapter handling in non-continuous cases. Cache size
+  display. Stabilizing and Testing. RC for STABLE.
+
+* __11.1 [DONE]__ STABLE RELEASE. (Released earlier than 1 Jan, to allow for caching).
+
+* __11.? [TODO]__ Controls revamp (Checklist style); Cache listing.
+
+* __11.?? [TODO]__ Preloading
+
+* __11.33 [TODO]__ STABLE RELEASE.
+
+* __11.?? [TODO]__ Manga Select & Bookmarking.
+
+* __11.111 [TODO]__ STABLE RELEASE.
