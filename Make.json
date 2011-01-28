@@ -1,0 +1,23 @@
+{
+  "script": [
+    "lib/json2.js",
+    "lib/jquery.js",
+    "nl",
+    "lib/object_size.js",
+    "lib/function_defaults.js",
+    "nl",
+    "nl",
+    "main.js",
+    "nl",
+    "init.js"
+  ],
+  "userjs": [
+    "uso/head_0.js",
+    "ver",
+    "uso/head_1.js",
+    "nl",
+    "lib/base64.js",
+    "nl",
+    "uso/body.js"
+  ]
+}
