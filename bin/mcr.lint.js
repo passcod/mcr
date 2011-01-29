@@ -1,3 +1,70 @@
+var MCR_VERSION = 11.28;
+/** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
+if (typeof DOMParser === 'undefined') {
+  DOMParser = function () {};
+  
+  DOMParser.prototype.parseFromString = function (str, contentType) {
+    var xmldata;
+    
+    if (typeof ActiveXObject !== 'undefined') {
+      xmldata = new ActiveXObject('MSXML.DomDocument');
+      
+      xmldata.async = false;
+      xmldata.loadXML(str);
+      
+      return xmldata;
+    } else if (typeof XMLHttpRequest !== 'undefined') {
+      xmldata = new XMLHttpRequest();
+      
+      if (!contentType) {
+        contentType = 'application/xml';
+      }
+      
+      xmldata.open('GET', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(str), false);
+      
+      if (xmldata.overrideMimeType) {
+        xmldata.overrideMimeType(contentType);
+      }
+      
+      xmldata.send(null);
+      return xmldata.responseXML;
+    }
+  };
+}
+/**
+ * Handy function to get the size of an object
+ * @author James Coglan
+ * @url http://stackoverflow.com/questions/5223/length-of-javascript-associative-array/6700#6700
+ */
+Object.size = function (obj) {
+	"use strict";
+	var size = 0, key;
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			size++;
+		}
+	}
+	return size;
+};
+/**
+ * Provides support for default arguments in functions.
+ * @author fatbrain
+ * @url    http://parentnode.org/javascript/default-arguments-in-javascript-functions/
+ */
+Function.prototype.defaults = function () {
+	"use strict";
+	var f = this,
+		a = [f.length-arguments.length];
+	
+	a = a.concat(Array.prototype.slice.apply(arguments));
+	return function () {
+		return f.apply(f, Array.prototype.slice.apply(arguments).concat(a.slice(arguments.length, a.length)));
+	};
+};
+
+
+
+
 (function (window) {
 	"use strict";
   
@@ -105,7 +172,7 @@
             " 		Userscript by <a href='http://passcod.cz.cc'>passcod</a>"+
             " 		- Uses <a href='http://jquery.com'>jQuery</a>"+
             " 		- Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>"+
-            "     - Fork me on <a href='https://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
+            "     - Fork me on <a href='http://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
             " 		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a> + Attribution"+
             "		  - Thanks for using!"+
             "   </nav>"+
@@ -1004,3 +1071,26 @@
 
 	window.MCR = MCR;
 })(window);
+
+
+$(function (){
+  // Disable the annoying 'skip to next page' keyboard shortcut
+  function omvKeyPressed() {}
+  document.onkeydown = function() {};
+  
+	MCR.Global.request = MCR.Tool.parseUrl(window.location);
+	MCR.Global.manga.title = MCR.Tool.capitalize(MCR.Global.request.manga.replace(/-/ig, ' '));
+	MCR.Global.manga.chapter = {
+		"number": MCR.Global.request.chapter,
+		"name": ""
+	};
+	
+	$('head > *').not('script').remove(); // remove everything except ourselves.
+
+  MCR.UI.init();
+	MCR.Option.init();
+	MCR.Cache.init();
+	MCR.Do.init();
+
+	MCR.Get.chapter();
+});

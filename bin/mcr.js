@@ -1,4 +1,4 @@
-MCR_VERSION = 11.28;
+var MCR_VERSION = 11.28;
 /*
     http://www.JSON.org/json2.js
     2010-11-17
@@ -639,6 +639,38 @@ e&&e.document?e.document.compatMode==="CSS1Compat"&&e.document.documentElement["
 
 
 
+/** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
+if (typeof DOMParser === 'undefined') {
+  DOMParser = function () {};
+  
+  DOMParser.prototype.parseFromString = function (str, contentType) {
+    var xmldata;
+    
+    if (typeof ActiveXObject !== 'undefined') {
+      xmldata = new ActiveXObject('MSXML.DomDocument');
+      
+      xmldata.async = false;
+      xmldata.loadXML(str);
+      
+      return xmldata;
+    } else if (typeof XMLHttpRequest !== 'undefined') {
+      xmldata = new XMLHttpRequest();
+      
+      if (!contentType) {
+        contentType = 'application/xml';
+      }
+      
+      xmldata.open('GET', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(str), false);
+      
+      if (xmldata.overrideMimeType) {
+        xmldata.overrideMimeType(contentType);
+      }
+      
+      xmldata.send(null);
+      return xmldata.responseXML;
+    }
+  };
+}
 /**
  * Handy function to get the size of an object
  * @author James Coglan
@@ -673,13 +705,13 @@ Function.prototype.defaults = function () {
 
 
 
-document = window.document;
-
 (function (window) {
 	"use strict";
-
+  
   /** @namespace */
-  var MCR = {
+  var MCR = {};
+  
+  MCR = {
 	  /**
 	   * A namespace for all "Globals" used in the script
 	   */
@@ -711,7 +743,7 @@ document = window.document;
 	   * Holds information about the script itself.
 	   */
 	  Info: {
-		  "version": <?php echo json_encode($version); ?> ,
+		  "version": MCR_VERSION,
 		  "keyPrefix": "MCR-"
 	  },
 
@@ -743,9 +775,7 @@ document = window.document;
 	     */
 	    html: ""+
             "<div id='container'>"+
-            "	<h1 id='title'></h1>"+
-            "	<h2 id='chapter'></h2>"+
-            "	<div id='navbar' class='white'>Chapter: "+
+            "	<nav id='main'>"+
             "		<span id='chapters' class='white'><select><option>---</option></select></span>"+
             "		<span id='links'>"+
             "			<a href='/'>Home</a>"+
@@ -762,52 +792,48 @@ document = window.document;
             "			-"+
             "			<a id='next'>Next</a>"+
             "		</span>"+
-            "	</div>"+
-            "	<div id='control-panel' class='white'>"+
-            "		<div id='control-container'>"+
-            "			<label id='control-allblack'><button>Invert Colours</button></label>"+
-            "			<label id='control-spacing'>Spacing <input type='text' value='' /></label>"+
-            "			<label id='control-hotkeys'><button>Toggle Hotkeys</button></label>"+
-            "			<label id='control-showfirst'><button>Load First page</button></label>"+
-            "			<label id='control-cache'><button>Toogle Cache</button></label>"+
-            "			<label id='control-cachesize'><small>Cache: <b><span>0</span>%</b> used.</small></label>"+
-            "			<label id='control-clearcache'><button>Clear Cache <b>(!)</b></button></label>"+
-            "			<label id='control-forced800'><button>Force image width</button></label>"+
-            "			<label id='control-ads'><button>Ads?</button></label>"+
-            "		</div>"+
-            "		<a id='control-close'>Close</a>"+
-            "	</div>"+
-            "	<div id='pages' class='forced800'>"+
-            "		Loading..."+
-            "	</div>"+
-            "	<div id='about'>"+
-            "		Userscript by <a href='http://passcod.cz.cc'>passcod</a>"+
-            "		- Uses <a href='http://jquery.com'>jQuery</a>"+
-            "		- Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>"+
-            "		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a> + Attribution"+
-            "		- Thanks for using!"+
-            "	</div>"+
-            "	<div id='adfooter'>"+
-            "		<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
-            "		<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btright' class='right' />"+
-            "	</div>"+
-            "</div>"
+            "	</nav>"+
+            "	<nav id='options'>"+
+            "   <p>Option Item 1</p>"+
+            "	</nav>"+
+            " <section>"+
+            "   <header>"+
+            "     <h1>Manga</h1>"+
+            "   </header>"+
+            "	  <article>"+
+            "     <header>"+
+            "	      <h1>Chapter</h1>"+
+            "     </header>"+
+            "		  <p>Loading...</p>"+
+            "	  </article>"+
+            " </section>"+
+            "	<footer>"+
+            "   <nav>"+
+            " 		Userscript by <a href='http://passcod.cz.cc'>passcod</a>"+
+            " 		- Uses <a href='http://jquery.com'>jQuery</a>"+
+            " 		- Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>"+
+            "     - Fork me on <a href='http://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
+            " 		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a> + Attribution"+
+            "		  - Thanks for using!"+
+            "   </nav>"+
+            "	  <!--<div id='ads'>"+
+            "		  <iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
+            "	  	<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btright' class='right' />"+
+            "	  </div>-->"+
+            "	</footer>"+
+            "</div>",
       css: {
         "*": {
 	        "color": "inherit"
         },
         "body": {
-	        "font-family": "sans-serif",
-	        "color": "black"
-        },
-        "#fakedoc, #fakedoc *": {
-	        "display": "none"
+	        "font-family": "sans-serif"
         },
         "#container": {
 	        "width": "800px",
 	        "margin": "5em auto"
         },
-        "#navbar": {
+        "nav#main": {
 	        "top": "0px",
 	        "left": "auto",
 	        "width": "780px",
@@ -823,7 +849,7 @@ document = window.document;
 	        "font-size": "0.6em",
 	        "color": "#CCC"
         },
-        "#control-panel": {
+        "nav#options": {
 	        "top": "50px",
 	        "left": "auto",
 	        "width": "780px",
@@ -833,50 +859,22 @@ document = window.document;
 	        "position": "fixed",
 	        "font-size": "1em"
         },
-        "#control-container": {
-	        "line-height": "2.5em"
+        "section header": {
+          "font-size": "1.5em"
         },
-        "#control-container label": {
-	        "margin": "0 0.3em",
-	        "padding": "0.2em",
-	        "border-style": "solid",
-	        "border-width": "1px",
-	        "border-radius": "5px",
-	        "-moz-border-radius": "5px",
-	        "-webkit-border-radius": "5px",
-	        "-khtml-border-radius": "5px"
-        },
-        "#control-container button, #control-container input": {
-	        "background": "transparent",
-	        "border": "0px"
-        },
-        "#control-legend": {
-	        "padding-top": "1em",
-	        "padding-left": "2em",
-	        "line-height": "1em"
-        },
-        "#control-legend div": {
-	        "color": "#CCC",
-	        "font-size": "smaller",
-	        "display": "none"
-        },
-        "#control-close": {
-	        "float": "right",
-	        "font-size": "smaller"
-        },
-        "#control-spacing input": {
-	        "width": "3em"
-        },
-        "#pages": {
+        "article": {
 	        "text-align": "center"
         },
-        "#pages img": {
+        "article header": {
+          "font-size": "1.2em"
+        },
+        "article img": {
 	        "margin-bottom": "1em"
         },
         ".forced800 img": {
 	        "width": "800px"
         },
-        "#about": {
+        "footer nav": {
 	        "font-size": "0.7em",
 	        "margin": "1em auto",
 	        "text-align": "center"
@@ -902,18 +900,18 @@ document = window.document;
         ".white select, select.white, .black select, select.black": {
 	        "color": "black"
         },
-        "#adfooter .left": {
+        "footer #ads .left": {
 	        "float": "left"
         },
-        "#adfooter .right": {
+        "footer #ads .right": {
 	        "float": "right"
         }
       },
       
       init: function () {
-        MCR.UI.css["#pages img"]["margin-bottom"] = MCR.Option.get('spacing');
+        MCR.UI.css["article img"]["margin-bottom"] = MCR.Option.get('spacing');
         
-        $('body').html(MCR.UI.html).addClass('white');
+        $('body').html(MCR.UI.html).add('nav').addClass('white');
         MCR.Tool.addCss(MCR.UI.css);
       }
 	  },
@@ -924,8 +922,7 @@ document = window.document;
 	  Tool: {
 
 		  /**
-		   * Performs a GET request to the provided url, cleans up the returned data, and
-		   * puts the resulting HTML in div#fakedoc.
+		   * Performs a GET request to the provided url and returns a DOM document.
 		   * 
 		   * @param url        The request URL
 		   * @param callback   An optional function to execute when the request is complete.
@@ -934,47 +931,36 @@ document = window.document;
 		   * @return void
 		   */
 		  getFake: function (/** String */ url, /** Function */ callback, /** Object */ settings) {
-	
-			  /**
-			   * Cleanses the raw HTML provided by removing <script/> tags and only keeping
-			   * the inner contents of <body/>.
-			   *
-			   * @param html   The raw HTML string to be cleansed.
-			   *
-			   * @return {String} The cleansed HTML.
-			   */
-			  function cleanse_html(/** String */ html) {
-				  html = html.replace(/\n/g, ' '); // Remove new lines, it confuses the regexes
-				  html = html.replace(/<script[^>]*>[^<]+<\/script>/ig, ''); // Scripts are annoying, they can reload the page.
-				  html = html.replace(/^.*<body[^>]*>/i, '');
-				  html = html.replace(/<\/body>.*$/i, '');
-				  return html; // Now all that remains is what was inside <body/>, no scripts.
-			  }
-	
 			  $.ajax({
 				  type: "GET",
 				  url: url,
-				  success: function (data, stat, xhr) {
-					  if ( /<h1>404 Not Found<\/h1>/i.test(data) ) {
-						  $('#fakedoc').html('');
-					  }
-					  else {
-						  data = cleanseHtml(data);
-						  $('#fakedoc').html(data);
-					  }
-
+				  success: function (data) {
 					  if ( callback ) {
-						  callback();
+					    var p = new DOMParser(),
+					        doc = p.parseFromString(data, "text/xml");
+					    
+						  callback(doc);
 					  }
 				  },
 				  error: function (xhr, stat, err) {
-					  $('#fakedoc').html(''); // Clean it so the callback fails nicely.
+					  
+					  var data = "<html><head></head><body><div id='status'>"+
+					    stat+"</div><div id='error'>"+err+"</div><div id='url'>"+
+					    url+"</div>";
+					  
 					  if ( stat == 'timeout' ) {
-						  $('#fakedoc').html('<div id="imgholder"><img src="/qwertyuiopasdfghjklzxcvbnm.404" alt="-" /></div>');
+						  data += '<div id="imgholder"><img src="/qwertyuiopasdfghjklzxcvbnm.404" alt="-" /></div>';
 					  }
-
+            
+            data += "</body></html>";
+            
+            
+            
 					  if ( callback ) {
-						  callback();
+					    var p = new DOMParser(),
+					        doc = p.parseFromString(data, "text/xml");
+					    
+						  callback(doc);
 					  }
 				  },
 				  timeout: 5000 // This should be enough for anyone. I don't think many dial-up users use this script...
@@ -1423,7 +1409,7 @@ document = window.document;
 		   *
 		   * @return void
 		   */
-		  clear = function () {
+		  clear: function () {
 			  for ( i in MCR.Cache.store ) {
 				  MCR.Cache.set(i, {});
 			  }
@@ -1455,7 +1441,7 @@ document = window.document;
 		   *
 		   * @return void
 		   */
-		  displayStatus = function (/** String */ status, /** Boolean */ animate) {
+		  displayStatus: function (/** String */ status, /** Boolean */ animate) {
 			  if (animate) {
 				  $('#status').stop().fadeOut('fast', function () {
 					  $('#status').text(status).fadeIn();
@@ -1503,6 +1489,9 @@ document = window.document;
 	
 				  case 190:
 					  MCR.Get.nextChapter();
+					  return;
+					
+					default:
 					  return;
 			  }
 		  },
@@ -1668,7 +1657,7 @@ document = window.document;
 			   */
 			  hide: function (/** String */ panel) {
 				  $('#'+panel+'-panel').fadeOut('fast');
-			  }.defaults('control'),
+			  }.defaults('control')
 		  }
 	  },
 	
