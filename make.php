@@ -3,7 +3,7 @@
 $version = chop(file_get_contents('VERSION'));
 $compile = json_decode(file_get_contents('Make.json'), true);
 
-$js = "MCR_VERSION = ".$version.";\n";
+$js = "var MCR_VERSION = ".$version.";\n";
 
 foreach ( $compile['script'] as $file ) {
   if ( $file == 'nl' ) {
@@ -34,5 +34,19 @@ foreach ( $compile['userjs'] as $file ) {
 $userjs .= "\n\nfunction GetIt() { return '".$b64."'; }";
 
 file_put_contents('bin/mcr.user.js', $userjs);
+
+
+$lintage = "var MCR_VERSION = ".$version.";\n";
+
+foreach ( $compile['lintage'] as $file ) {
+  if ( $file == 'nl' ) {
+    $lintage .= "\n\n";
+  } else {
+    $lintage .= file_get_contents($file);
+  }
+}
+
+file_put_contents('bin/mcr.lint.js', $lintage);
+
 
 ?>

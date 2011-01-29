@@ -3,6 +3,7 @@
     "lib/json2.js",
     "lib/jquery.js",
     "nl",
+    "lib/dom_parser.js",
     "lib/object_size.js",
     "lib/function_defaults.js",
     "nl",
@@ -19,5 +20,15 @@
     "lib/base64.js",
     "nl",
     "uso/body.js"
+  ],
+  "lintage": [
+    "lib/dom_parser.js",
+    "lib/object_size.js",
+    "lib/function_defaults.js",
+    "nl",
+    "nl",
+    "main.js",
+    "nl",
+    "init.js"
   ]
 }
