@@ -1,4 +1,4 @@
-var MCR_VERSION = 11.29;
+var MCR_VERSION = '11.30';
 /*
     http://www.JSON.org/json2.js
     2010-11-17
@@ -730,6 +730,10 @@ Object.size = function (obj) {
 			  "chapters": {},
 			  "title": "",
 			  "description": "",
+			  "pubdate": "",
+			  "status": "",
+			  "author": "",
+			  "artist": "",
 			  "chapter": {
 				  "number": 0,
 				  "name": ""
@@ -753,7 +757,12 @@ Object.size = function (obj) {
 		    var n = $('nav#info');
 		    $('h1', n).html(MCR.Global.manga.title);
 		    $('h2', n).html(MCR.Global.manga.chapter['name']);
-		    $('p', n).html(MCR.Global.manga.description);
+		    $('#description', n).html(MCR.Global.manga.description);
+		    $('date[pubdate]', n).text(MCR.Global.manga.pubdate);
+		    $('#stat', n).html(MCR.Global.manga.status);
+		    $('#author', n).text(MCR.Global.manga.author);
+		    $('#artist', n).text(MCR.Global.manga.artist);
+		    $('#cover', n).attr('src', MCR.Global.manga.cover);
 		    
 		    $('#version').text(MCR_VERSION);
 		  }
@@ -805,11 +814,14 @@ Object.size = function (obj) {
             "   <p>Option Item 1</p>"+
             "	</nav>"+
             " <nav id='info'>"+
+            "   <img id='cover' />"+
             "   <header>"+
             "     <h1>Manga</h1>"+ // Manga title
             "     <h2>Chapter</h2>"+ // Chapter name
             "   </header>"+
-            "   <p>Description</p>"+ // Description
+            "   <p>Released since <date pubdate='pubdate'></date> and currently <i id='stat'></i></p>"+
+            "   <p>Story by <b id='author'>author</b>, Art by <b id='author'>author</b>.</p>"+
+            "   <p id='description'>Description</p>"+
             " </nav>"+
             " <article>"+
             "   <p>Loading...</p>"+
@@ -861,6 +873,11 @@ Object.size = function (obj) {
         "#chapters select": {
           "position": "relative",
           "top": "-6px"
+        },
+        "img#cover": {
+          "float": "right",
+          "height": "20em",
+          "margin": "1em"
         },
         "#status": {
 	        "font-size": "0.8em"
@@ -918,6 +935,7 @@ Object.size = function (obj) {
         MCR.UI.css["article img"]["margin-bottom"] = MCR.Option.get('spacing');
         
         $('body').append(MCR.UI.html).add('nav').addClass('white');
+        $('#pre').remove();
         MCR.Tool.addCss(MCR.UI.css);
       }
 	  },
@@ -1182,15 +1200,15 @@ Object.size = function (obj) {
 		   * The options/controls list and their default values.
 		   */
 		  defaults: {
-			  "spacing"      : "1em",
-			  "allblack"     : "off",
-			  "hotkeys"      : "off",
-			  "showfirst"    : "off",
-			  "forced800"    : "on" ,
-			  "ads"          : "on" ,
+			  "spacing"      : "1em", // Page spacing
+			  "allblack"     : "off", // Background color
+			  "hotkeys"      : "off", // Hotkeys
+			  "showfirst"    : "off", // Show first page while loading a chapter
+			  "forced800"    : "on" , // Force img width to 800px
+			  "ads"          : "on" , // Display MR.net's ads
 	
-			  "cache"        : "off",
-			  "cache-images" : "{}"
+			  "cache"        : "off", // Use cache (and persist if localStorage)
+			  "cache-images" : "{}"   // Image cache store
 		  },
 		
 		  /**
@@ -1692,19 +1710,21 @@ Object.size = function (obj) {
 						  MCR.Global.request.chapter,
 						  MCR.TMP.page);
 				  },
-			    
-				  updateDetails = function (use_cache) {
-					  
-					  
-					  MCR.Info.show();
-				  },
 			
 				  updateSelect = function (doc) {
 					  //
 				  },
 			
 				  updateDisplay = function (use_cache) {
-					  //
+					  var i, h = "", t;
+					  for ( i in MCR.TMP.list ) {
+					    t = MCR.Global.manga.title + '/' +
+					      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + '/' +
+					      'Page ' + i;
+					    h += "<img src='"+MCR.TMP.list[i]+"' alt='"+i+"' title='"+i+"' />\n";
+					  }
+					  $('article').html(h);
+					  MCR.Do.displayStatus('Loaded');
 				  },
 				  
 				  doPage1 = function (doc) {
@@ -1737,11 +1757,19 @@ Object.size = function (obj) {
 				    
 				    MCR.Tool.getFake(MCR.Tool.buildUrl(MCR.Global.request.manga), function (doc) {
 				      MCR.Global.manga.description = $('#readmangasum p', doc).text();
+				      MCR.Global.manga.cover = $('#mangaimg img', doc).attr('src');
+				      MCR.Global.manga.pubdate = $('#mangaproperties tr:eq(2) td:last', doc).text();
+				      MCR.Global.manga.status = $('#mangaproperties tr:eq(3) td:last', doc).text();
+				      MCR.Global.manga.author = $('#mangaproperties tr:eq(4) td:last', doc).text();
+				      MCR.Global.manga.artist = $('#mangaproperties tr:eq(5) td:last', doc).text();
+				      
 				      MCR.Info.show();
 				    });
 				  },
 			
 				  mainLoop = function () {
+				    MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'...'+
+				      '('+MCR.TMP.page+')', false);
 					  MCR.Tool.getFake(makeUrl(), function (doc) {
 					    var disp = false,
 					        img = $('#img', doc);
@@ -1753,19 +1781,19 @@ Object.size = function (obj) {
 			          MCR.TMP.page++;
 			          mainLoop();
 				      } else {
-					      updateDetails();
 					      updateDisplay();
 					    }
 					  });
 				  };
-			
+			  
+			  MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'...');
+			  
 			  /*if ( MCR.Option.switched("cache") ) {
 				  // Cache is enabled
 				  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)] ) {
 					  // Cache has this manga
 					  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] ) {
 						  // Cache has this chapter
-						  updateDetails(true);
 						  updateDisplay(true);
 						  return;
 					  }
@@ -1825,10 +1853,6 @@ $(function (){
 		"name": ""
 	};
 	
-	
-	
-	$('head > *').not('script').remove(); // remove everything except ourselves.
-
   MCR.UI.init();
 	MCR.Option.init();
 	MCR.Cache.init();
@@ -1837,4 +1861,16 @@ $(function (){
   MCR.Info.show();
   
 	MCR.Get.chapter();
+	
+	alert(""+
+	  "This is a pre-release (beta) version. Check often for updates.\n\nAs such, features may be broken or missing. "+
+	  "Please do not report these as bugs. Refer to the release notes below:"+
+	  "\n\n"+
+	  "* No cache.\n"+
+	  "* Not possible to change options.\n"+
+    "* Icons for nav panel.\n"+
+    "* Faster load, lighter footprint.\n"+
+    "* Fetches and displays manga description and details.\n"+
+    "* No navigation yet. Have to browse the site to select manga *and* chapters.\n"
+	);
 });

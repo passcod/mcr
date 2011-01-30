@@ -24,7 +24,7 @@ Running with no arguments uses the version in the VERSION file.
 <?php exit;
 }
 
-$js = "var MCR_VERSION = ".$version.";\n";
+$js = "var MCR_VERSION = '".$version."';\n";
 
 foreach ( $compile['script'] as $file ) {
   if ( $file == 'nl' ) {
@@ -69,5 +69,6 @@ foreach ( $compile['lintage'] as $file ) {
 
 file_put_contents('bin/mcr.lint.js', $lintage);
 
+echo "OK: Compiled v. ".$version." at ".date(DATE_ATOM)."\n";
 
 ?>
