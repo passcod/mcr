@@ -1,4 +1,4 @@
-var MCR_VERSION = 11.28;
+var MCR_VERSION = 11.29;
 /** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
 if (typeof DOMParser === 'undefined') {
   DOMParser = function () {};
@@ -37,7 +37,6 @@ if (typeof DOMParser === 'undefined') {
  * @url http://stackoverflow.com/questions/5223/length-of-javascript-associative-array/6700#6700
  */
 Object.size = function (obj) {
-	"use strict";
 	var size = 0, key;
 	for (key in obj) {
 		if (obj.hasOwnProperty(key)) {
@@ -46,41 +45,26 @@ Object.size = function (obj) {
 	}
 	return size;
 };
-/**
- * Provides support for default arguments in functions.
- * @author fatbrain
- * @url    http://parentnode.org/javascript/default-arguments-in-javascript-functions/
- */
-Function.prototype.defaults = function () {
-	"use strict";
-	var f = this,
-		a = [f.length-arguments.length];
-	
-	a = a.concat(Array.prototype.slice.apply(arguments));
-	return function () {
-		return f.apply(f, Array.prototype.slice.apply(arguments).concat(a.slice(arguments.length, a.length)));
-	};
-};
 
 
 
 
 (function (window) {
-	"use strict";
-  
+  "use strict";
+    
   /** @namespace */
   var MCR = {};
   
   MCR = {
+    /**
+	   * Used to get through scopes without polluting.
+	   */
+	  TMP: {},
+
 	  /**
 	   * A namespace for all "Globals" used in the script
 	   */
 	  Global: {
-		  /**
-		   * Used to get through scopes without polluting.
-		   */
-		  TMP: {},
-
 		  /**
 		   * Information about the current request.
 		   */
@@ -92,6 +76,7 @@ Function.prototype.defaults = function () {
 		  manga: {
 			  "chapters": {},
 			  "title": "",
+			  "description": "",
 			  "chapter": {
 				  "number": 0,
 				  "name": ""
@@ -104,7 +89,21 @@ Function.prototype.defaults = function () {
 	   */
 	  Info: {
 		  "version": MCR_VERSION,
-		  "keyPrefix": "MCR-"
+		  "keyPrefix": "MCR-",
+		  
+		  /**
+		   * Updates the manga info panel and the version number.
+		   *
+		   * @return void
+		   */
+		  show: function () {
+		    var n = $('nav#info');
+		    $('h1', n).html(MCR.Global.manga.title);
+		    $('h2', n).html(MCR.Global.manga.chapter['name']);
+		    $('p', n).html(MCR.Global.manga.description);
+		    
+		    $('#version').text(MCR_VERSION);
+		  }
 	  },
 
 	  /**
@@ -138,43 +137,40 @@ Function.prototype.defaults = function () {
             "	<nav id='main'>"+
             "		<span id='chapters' class='white'><select><option>---</option></select></span>"+
             "		<span id='links'>"+
-            "			<a href='/'>Home</a>"+
-            "			/"+
-            "			<a id='mangalink'>Manga</a>"+
-            "			/"+
-            "			<a id='control-button'>Options</a>"+
-            "			/"+
-            "			<a id='permalink' href='#'>Permalink</a>"+
+            "			<a href='/'><img alt='Home' title='Home' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAAZQTFRFAPBjgICA886xlAAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH2wEdDjQOfTITRAAAADdJREFUCNdjYIABCSCWAWI7IH4PxPcbGBj3HmBgr3/AwPb/AwPv/x0M1v//MLD/f4DAHzAxGgAAlVoaeSJXjhgAAAAASUVORK5CYII=' /></a>"+
+            "			<a id='info-button'><img alt='Manga' title='Manga Info' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sBHQ4yNO1kbXAAAAKOSURBVEjHvZYxaxVBFIW/E7QKpFAkihZRMGBAiGChhdi8zvgHDFiJxKQV27n3RzyNnSCxtFE7KxF8pUE0SMCUUUQLwSrKsXBWXjb7YkR0YIudvTNzz5lzz134x0N7DSylIP0Mt01mAhARRMSfH1BKITOJiBnbi8BZAEnY3gJWgX5mrjWxXWOsPdFkI2m6lDKw/VrSkqQp4JDtQ5JOAkuS3pRSXkg6vicEDdxSygJwR5KBJ8B8RHxpIZyQtGJ7riZ0IyKW22jUQc0CcFvSZ9u9zHzZhbJBWkqZBZ5KOmB7MTOXOxHUBdO230r6ZPu0pM1mo4i4bvuupC3bRzPz49DaI7ZfAQclnbC90aAYax3Ql2Tbvdbm47bv1tD9wGIL1KakXlXYg06KIuKU7TeSHkfE5Q7q3gHNZV7MzGcd1D0C5mzPZObaNgS2l6rO57tUlZknJN2UdCkzn43Q/ny98KVfamw0DwwkTUXE4Y7sr0k6VhMRsJGZ90YU43vb65l5AWDfUPFg+2unlqVpoAecqe/PgXsdcc0e+3cUWmMDIyR5C3g4ROe3vVrMWOMttrckjQ9Rtu0OgH22d/Uq20gal7S17YAqq1Xbk6WUiVG+stuoayZsT9pebRIb9qK+JCSt/IU7r1S6+9sOiAgyc832wPZcRMyONK/WXQ1bhqQ5YBARazsKrfI+DbwFPkk6DWxW8/vedl5JRIQaqwBe2d5hFepQzQJw2/ZnSb2IePmbRjQLPK0+dCMiln/bcBq7rpk+BuZtfxnuaMAEsFJpAbgK3G9XuHbpZMdtP5B0rn760BSipHHbk3V+IOlKRGzsqaM13FUez9ueAfq214GP9VmvqpupMRt/9WfQZWy7Nfr/On4AGaxzz0yjBboAAAAASUVORK5CYII=' /></a>"+
+            "			<a id='options-button'><img alt='Options' title='Options' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYBAMAAAASWSDLAAAAAXNSR0IArs4c6QAAAC1QTFRFMzY2gYOD7+/vIyYmFBcX0NDQwMHBkZKS4ODgoaKicnR0YmRksLGxU1VV////nH0LMwAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH2wEdDjQmSIe7vgAAAEFJREFUGNNjYCATCAIBMltQAMJmBAozwqTADJgUmIZJQcQYBSEkCgdqJpIMTI8gURywCYww94DdJojFoaheIBUAALaxBHc04z/DAAAAAElFTkSuQmCC' /></a>"+
+            "			<a id='permalink' href='#'><img alt='Permalink' title='Permalink to current chapter' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sBHQ4zKZd5MOgAAAOESURBVEjHlZbPaxxlGMc/33mTpjHYohJCaiUUG0WhpQeRXCR7EbTSm9iDoBdvIghRmk1md+3sZDfqbv4BT4p4UKOHlnjPwfRgIIdCINWUEusPKrZSN012953Hw84mG0l088AwvM87PN95v8/3+8zAARHmpl2ukO/tzH00W+GwIYAwegfXHORylKdQyI1CcAF4FugHNsxsaXOztlCpVBvZ7CTl8uzhAAr5KC1eeEuiChxLtwAwsy1grdGov1wqlX+ZmpqiVCp1DwCkxfWJmZmkPXtpTgDNZvPpOI7XzIw01cUJCrlRFPyA8TCAJJmZAT8DT0giXQtY996PxXF8p5sTBOntguCYpHbxa977EeCc9/60ma2oFQaccs690W0PgunpaddqaIsWM0u896/FcbyhgBrCe+8vmtnd9HACMrlcrr8rAOdckKqlHRvOudoHlwtHLKHa43puOucWgN86njkp6UhXAFEUNYCNjtyIT/zxxNtzkt5Om/mkpGfSPhwqelKVLAFbQJ8kucB9433zdUl/Snp0RxG7srkncTSfzzuEYbYdRcXNA5tc26wtAGtt9Ug651zP98BfB7zYSdCXkpaElqRgvlAoTORy4SBAGIa7Mq18XOW99yfIZrMn+vr6bqeUtCW5xwP7rTvzwC3v/fk4jlez2SzlcrlVZHJyktnZWcIwfMo59x1w6qAi/wHWXlq9Xn+8VCr9Wq3O7bq1bf8wDAdTnWdaVLQ4T5Vzeh/Q68CwpMd2EMxWarW/n69Uqg396+Ed++dyuf4dKYqjQl9JemEfgBve+1ecc19LOptStWVmF6MoutKzZ250sFIsFh8ADwBStQztR5OkUTOrJ0nyahAEa+lePzAGXAm6lLOlV3uU/GRmf5gZSZKESZLclrgL/N7pp3w+39sVgJltAzc7Uo9478e992fq9caH5XK5iTguMdRhxfvb29vedQOwuLjYyGQyw8CL6UB8KO3HFz29AeOZ8WERfCtpaHfw8vnMzMy1binCJ/5T4JaZtc14NnDBDSm4Hij4UdIZawXAvSRJrnaM6/+PuBjf8d6f7xjpJoRMQ5Z6sqNH7xaLxfVDAYRhSBzHq/X69gkzW0lnF6hl+Y43fzOKos/an1QdZjK2P/gTExO9AwMDL0kaA0aA+8BqkiRXi8XieqlUYnl5mfn5+UP/hTA3N7dnnc/ney9dunQgE/8AQaDLBNsZukkAAAAASUVORK5CYII=' /></a>"+
             "		</span>"+
             "		<span style='float: right;'>"+
             "			<span id='status'>Ready</span>"+
-            "			<a id='prev'>Previous</a>"+
-            "			-"+
-            "			<a id='next'>Next</a>"+
+            "			<a id='prev' title='Previous'>&lt;&lt;</a>"+
+            "			<a id='next' title='Next'>&gt;&gt;</a>"+
             "		</span>"+
             "	</nav>"+
             "	<nav id='options'>"+
             "   <p>Option Item 1</p>"+
             "	</nav>"+
-            " <section>"+
+            " <nav id='info'>"+
             "   <header>"+
-            "     <h1>Manga</h1>"+
+            "     <h1>Manga</h1>"+ // Manga title
+            "     <h2>Chapter</h2>"+ // Chapter name
             "   </header>"+
-            "	  <article>"+
-            "     <header>"+
-            "	      <h1>Chapter</h1>"+
-            "     </header>"+
-            "		  <p>Loading...</p>"+
-            "	  </article>"+
-            " </section>"+
+            "   <p>Description</p>"+ // Description
+            " </nav>"+
+            " <article>"+
+            "   <p>Loading...</p>"+
+            "   <div style='height: 300px'>DEBUG</div>"+
+            " </article>"+
             "	<footer>"+
             "   <nav>"+
             " 		Userscript by <a href='http://passcod.cz.cc'>passcod</a>"+
             " 		- Uses <a href='http://jquery.com'>jQuery</a>"+
             " 		- Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>"+
-            "     - Fork me on <a href='http://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
+            "     - Fork me on <a href='https://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
             " 		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a> + Attribution"+
             "		  - Thanks for using!"+
+            "     (v. <span id='version'></span>)"+
             "   </nav>"+
             "	  <!--<div id='ads'>"+
             "		  <iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
@@ -193,23 +189,7 @@ Function.prototype.defaults = function () {
 	        "width": "800px",
 	        "margin": "5em auto"
         },
-        "nav#main": {
-	        "top": "0px",
-	        "left": "auto",
-	        "width": "780px",
-	        "border": "5px #CCC solid",
-	        "padding": "5px",
-	        "position": "fixed",
-	        "font-size": "1em"
-        },
-        "#links": {
-	        "font-size": "0.8em"
-        },
-        "#status": {
-	        "font-size": "0.6em",
-	        "color": "#CCC"
-        },
-        "nav#options": {
+        "#container > nav": {
 	        "top": "50px",
 	        "left": "auto",
 	        "width": "780px",
@@ -217,16 +197,23 @@ Function.prototype.defaults = function () {
 	        "padding": "5px",
 	        "display": "none",
 	        "position": "fixed",
-	        "font-size": "1em"
+	        "font-size": "0.8em"
         },
-        "section header": {
-          "font-size": "1.5em"
+        "nav#main": {
+	        "top": "0px",
+	        "height": "24px",
+	        "display": "block",
+	        "line-height": "24px"
+        },
+        "#chapters select": {
+          "position": "relative",
+          "top": "-6px"
+        },
+        "#status": {
+	        "font-size": "0.8em"
         },
         "article": {
 	        "text-align": "center"
-        },
-        "article header": {
-          "font-size": "1.2em"
         },
         "article img": {
 	        "margin-bottom": "1em"
@@ -241,11 +228,17 @@ Function.prototype.defaults = function () {
         },
         "a": {
 	        "color": "inherit",
-	        "text-decoration": "none",
+	        "text-decoration": "underline",
 	        "cursor": "pointer"
         },
         "a:hover, a:focus": {
-	        "color": "#CCC"
+	        "text-decoration": "none"
+        },
+        "h1": {
+          "font-size": "1.7em"
+        },
+        "h2": {
+          "font-size": "1.2em"
         },
         ".black": {
 	        "background-color": "black",
@@ -271,7 +264,7 @@ Function.prototype.defaults = function () {
       init: function () {
         MCR.UI.css["article img"]["margin-bottom"] = MCR.Option.get('spacing');
         
-        $('body').html(MCR.UI.html).add('nav').addClass('white');
+        $('body').append(MCR.UI.html).add('nav').addClass('white');
         MCR.Tool.addCss(MCR.UI.css);
       }
 	  },
@@ -291,6 +284,14 @@ Function.prototype.defaults = function () {
 		   * @return void
 		   */
 		  getFake: function (/** String */ url, /** Function */ callback, /** Object */ settings) {
+		    var defaults = {
+		      timeout: 5000
+		    };
+		    
+		    if ( typeof settings === 'undefined' ) {
+		      settings = {};
+		    }
+		    
 			  $.ajax({
 				  type: "GET",
 				  url: url,
@@ -309,7 +310,7 @@ Function.prototype.defaults = function () {
 					    url+"</div>";
 					  
 					  if ( stat == 'timeout' ) {
-						  data += '<div id="imgholder"><img src="/qwertyuiopasdfghjklzxcvbnm.404" alt="-" /></div>';
+						  data += '<img src="/qwertyuiopasdfghjklzxcvbnm.404" alt="-" width="800" />';
 					  }
             
             data += "</body></html>";
@@ -323,7 +324,7 @@ Function.prototype.defaults = function () {
 						  callback(doc);
 					  }
 				  },
-				  timeout: 5000 // This should be enough for anyone. I don't think many dial-up users use this script...
+				  timeout: settings['timeout'] ? settings['timeout'] : defaults['timeout']
 			  });
 		  },
 
@@ -386,7 +387,6 @@ Function.prototype.defaults = function () {
 		   * @return void
 		   */
 		  addCss: function (/** String|Object */ css) {
-			  "use strict";
 	
 			  var el;
 	
@@ -518,7 +518,7 @@ Function.prototype.defaults = function () {
 			  } else {
 				  return 0;
 			  }
-		  }.defaults(false)
+		  }
 	  },
 
 	  /**
@@ -552,7 +552,7 @@ Function.prototype.defaults = function () {
 			  for ( key in MCR.Option.defaults ) {
 				  if ( MCR.Tool.canHazStorage() ) {
 					  MCR.Option.values[key] = window.localStorage[MCR.Info.keyPrefix+key] ? window.localStorage[MCR.Info.keyPrefix+key] : MCR.Option.defaults[key];
-					  window.localStorage[MCR.Info.keyPrefix+key] = returnedOptions[key];
+					  window.localStorage[MCR.Info.keyPrefix+key] = MCR.Option.values[key];
 				  } else {
 					  MCR.Option.values[key] = MCR.Option.defaults[key];
 				  }
@@ -802,6 +802,9 @@ Function.prototype.defaults = function () {
 		   * @return void
 		   */
 		  displayStatus: function (/** String */ status, /** Boolean */ animate) {
+			  if ( typeof animate !== 'boolean' ) {
+			    animate = true;
+			  }
 			  if (animate) {
 				  $('#status').stop().fadeOut('fast', function () {
 					  $('#status').text(status).fadeIn();
@@ -811,7 +814,7 @@ Function.prototype.defaults = function () {
 			  }
 	
 			  document.title = MCR.Global.manga.title+' / '+MCR.Global.request.chapter+' / '+status;
-		  }.defaults(true),
+		  },
 	
 		  /**
 		   * Holds controls functions which change a value.
@@ -948,9 +951,9 @@ Function.prototype.defaults = function () {
 		  },
 
 		  /**
-		   * Holds utility functions for the controls panels.
+		   * Holds utility functions for the panels.
 		   */
-		  controls: {
+		  panel: {
 			  /**
 			   * Binds the controls to their handles and sets the environment according
 			   * to the current options.
@@ -958,34 +961,17 @@ Function.prototype.defaults = function () {
 			   * @return void
 			   */
 			  init: function() {	
-				  $('#control-button').click(MCR.Do.control.show);
-				  $('#control-close').click(MCR.Do.control.hide);
-	
-				  $('#control-spacing input').keyup(MCR.Do.change.spacing);
-	
-				  $('#control-allblack button').click(MCR.Do.toggle.allBlack);
-				  $('#control-hotkeys button').click(MCR.Do.toggle.hotkeys);
-				  $('#control-showfirst button').click(MCR.Do.toggle.showFirst);
-				  $('#control-forced800 button').click(MCR.Do.toggle.forced800);
-				  $('#control-cache button').click(MCR.Do.toggle.cache);
-				  $('#control-ads button').click(MCR.Do.toggle.ads);				
+				  $('#options-button').click(MCR.Do.panel.toggle);
 				
-				
-				  $('#navigation-button').click(function() {MCR.Do.control.show('navigation');});
-				  $('#navigation-close').click(function() {MCR.Do.control.hide('navigation');});
-				
-				  $('#navigation-chapters').live('change', MCR.Get.selectedChapter);
+				  $('#chapters select').live('change', MCR.Get.selectedChapter);
 				  // Must be live: else it gets removed when the select is changed.
 				
-				  $('#navigation-previous').click(MCR.Get.previousChapter);
-				  $('#navigation-next').click(MCR.Get.nextChapter);
+				  $('#previous').click(MCR.Get.previousChapter);
+				  $('#next').click(MCR.Get.nextChapter);
 				
+				  $('#cache-button').click(function() {MCR.Do.panel.toggle('cache');});
+				  $('#info-button').click(function() {MCR.Do.panel.toggle('info');});
 				
-				
-				  $('#cache-button').click(function() {MCR.Do.control.show('cache');});
-				  $('#cache-close').click(function() {MCR.Do.control.hide('cache');});
-				
-				  $('#cache-clear').click(MCR.Cache.clear);
 				
 				  MCR.Do.change.spacing( MCR.Option.get('spacing') );
 	
@@ -998,26 +984,46 @@ Function.prototype.defaults = function () {
 			  },
 		
 			  /**
-			   * Displays the panel specified, or the control panel by default.
+			   * Displays the panel specified, or the options panel by default.
 			   *
 			   * @param panel The panel to show.
 			   *
 			   * @return void
 			   */
 			  show: function (/** String */ panel) {
-				  $('#'+panel+'-panel').fadeIn('fast');
-			  }.defaults('control'),
+			    if ( typeof panel !== 'string' ) {
+			      panel = 'options';
+			    }
+				  $('nav#'+panel).fadeIn('fast');
+			  },
 		
 			  /**
-			   * Hides the panel specified, or the control panel by default.
+			   * Hides the panel specified, or the control options by default.
 			   *
 			   * @param panel The panel to hide.
 			   *
 			   * @return void
 			   */
 			  hide: function (/** String */ panel) {
-				  $('#'+panel+'-panel').fadeOut('fast');
-			  }.defaults('control')
+				  if ( typeof panel !== 'string' ) {
+			      panel = 'options';
+			    }
+				  $('nav#'+panel).fadeOut('fast');
+			  },
+			  
+			  /**
+			   * Toggles a panel's visibility.
+			   *
+			   * @param panel The panel to toggle. Defaults to 'options'.
+			   *
+			   * @return void
+			   */
+			   toggle: function (/** String */ panel) {
+			    if ( typeof panel !== 'string' ) {
+			      panel = 'options';
+			    }
+			    $('nav#'+panel).toggle('fast', 'linear');
+			   }
 		  }
 	  },
 	
@@ -1026,46 +1032,127 @@ Function.prototype.defaults = function () {
 	   */
 	  Get: {
 		  chapter: function () {
-			  var url,
+			  var url, i,
 				  makeUrl = function () {
 					  return MCR.Tool.buildUrl(
 						  MCR.Global.request.manga,
 						  MCR.Global.request.chapter,
 						  MCR.TMP.page);
 				  },
+			    
+				  updateDetails = function (use_cache) {
+					  
+					  
+					  MCR.Info.show();
+				  },
 			
-				  updateDetails = function () {
+				  updateSelect = function (doc) {
 					  //
 				  },
 			
-				  updateSelect = function () {
+				  updateDisplay = function (use_cache) {
 					  //
 				  },
-			
-				  updateDisplay = function () {
-					  //
+				  
+				  doPage1 = function (doc) {
+				    // display first page if opt is on (TODO)
+				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
+				    var sss, ss, s = $('script:last', doc).contents().text();
+				    s = s.split("\n");
+				    ss = s.indexOf("function omvKeyPressed(e) {");
+				    sss = s.splice(0, ss).join("\n");
+				    eval(sss);
+				    
+				    MCR.Global.manga.id = document['mangaid'];
+				    
+				    $.getJSON('/actions/selector/?id='+MCR.Global.manga.id+'&which=0', function(j) {
+				      updateSelect(j);
+				      
+				      var i, k;
+				      
+				      for ( i in j ) {
+				        k = j[i];
+				        if ( k.chapter == String(MCR.Global.request.chapter) ) {
+				          MCR.Global.manga.chapter['name'] = j[i]['chapter_name'];
+				        }
+				        delete k['chapter'];
+				        MCR.Global.manga.chapters[ j[i]['chapter'] ] = k;
+				      }
+				      
+				      MCR.Info.show();
+				    });
+				    
+				    MCR.Tool.getFake(MCR.Tool.buildUrl(MCR.Global.request.manga), function (doc) {
+				      MCR.Global.manga.description = $('#readmangasum p', doc).text();
+				      MCR.Info.show();
+				    });
 				  },
 			
 				  mainLoop = function () {
-					  //
+					  MCR.Tool.getFake(makeUrl(), function (doc) {
+					    var disp = false,
+					        img = $('#img', doc);
+				      if ( typeof img.attr('src') != 'undefined' ) {
+			          MCR.TMP.list.push(img.attr('src'));
+			          if ( MCR.TMP.page == 1 ) {
+			            doPage1(doc);
+			          }
+			          MCR.TMP.page++;
+			          mainLoop();
+				      } else {
+					      updateDetails();
+					      updateDisplay();
+					    }
+					  });
 				  };
 			
-			  if ( MCR.Option.switched("cache") ) {
+			  /*if ( MCR.Option.switched("cache") ) {
 				  // Cache is enabled
-				  if ( MCR.Cache.chapters[String(MCR.Global.request.manga)] ) {
+				  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)] ) {
 					  // Cache has this manga
-					  if ( MCR.Cache.chapters[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] ) {
+					  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] ) {
 						  // Cache has this chapter
-						  updateDetails();
-						  updateDisplay();
+						  updateDetails(true);
+						  updateDisplay(true);
 						  return;
 					  }
 				  }
-			  } else {
+			  } else {*/
+			    MCR.TMP.list = [];
 				  MCR.TMP.page = 1;
 				  mainLoop();
-			  }
-		  }	
+			  //}
+		  },
+	        
+	   // Chapter Switching
+
+      selectedChapter: function () {
+	      MCR.Global.request.chapter = $('#chapters').val();
+	
+	      MCR.Get.chapter();
+      },
+
+      previousChapter: function() {
+	      var chi = MCR.Global.manga.chapterOrder.indexOf( MCR.Global.request.chapter );
+	
+	      if (MCR.Global.manga.chapterOrder[ chi - 1 ]) {
+		      MCR.Global.request.chapter = MCR.Global.manga.chapterOrder[ chi - 1 ];
+		      MCR.Get.chapter();
+	      } else {
+		      MCR.Do.displayStatus('This is the first Chapter');
+	      }
+      },
+
+      nextChapter: function () {
+	      var chi = MCR.Global.manga.chapterOrder.indexOf( MCR.Global.request.chapter );
+	
+	      if (MCR.Global.manga.chapterOrder[ chi + 1 ]) {
+		      MCR.Global.request.chapter = MCR.Global.manga.chapterOrder[ chi + 1 ];
+		      MCR.Get.chapter();
+	      } else {
+		      MCR.Do.displayStatus('This is the last Chapter');
+	      }
+      }
 	  }
   };
 
@@ -1085,12 +1172,16 @@ $(function (){
 		"name": ""
 	};
 	
+	
+	
 	$('head > *').not('script').remove(); // remove everything except ourselves.
 
   MCR.UI.init();
 	MCR.Option.init();
 	MCR.Cache.init();
-	MCR.Do.init();
-
+	MCR.Do.panel.init();
+  
+  MCR.Info.show();
+  
 	MCR.Get.chapter();
 });

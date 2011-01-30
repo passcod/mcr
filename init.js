@@ -10,12 +10,16 @@ $(function (){
 		"name": ""
 	};
 	
+	
+	
 	$('head > *').not('script').remove(); // remove everything except ourselves.
 
   MCR.UI.init();
 	MCR.Option.init();
 	MCR.Cache.init();
-	MCR.Do.init();
-
+	MCR.Do.panel.init();
+  
+  MCR.Info.show();
+  
 	MCR.Get.chapter();
 });

@@ -5,7 +5,6 @@
     "nl",
     "lib/dom_parser.js",
     "lib/object_size.js",
-    "lib/function_defaults.js",
     "nl",
     "nl",
     "main.js",
@@ -24,7 +23,6 @@
   "lintage": [
     "lib/dom_parser.js",
     "lib/object_size.js",
-    "lib/function_defaults.js",
     "nl",
     "nl",
     "main.js",
