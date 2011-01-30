@@ -2,18 +2,10 @@ Manga ChapterReader
 ===================
 
 A Userscript for [mangareader.net](http://mangareader.net) which loads a full
-chapter for easier reading. It uses [jQuery](http://jquery.com) and works in
+chapter for easier reading. It displays the full chapter in a simple yet elegant
+monochrome interface. It uses [jQuery](http://jquery.com) and works in
 (AFAIK) Firefox 3.6+ (Greasemonkey), Firefox 4b+ (Scriptish), and Chromium
 (tested in 9+).
-
-It displays the full chapter in a simple monochrome interface with many options,
-including the ability to cache already visited chapters for faster loading,
-changing the background colour from white to black, toggling hotkeys, and forcing
-the image width to 800 pixels (for small/laptop screens).
-
-It is the only script of its kind to indirectly support the manga site, by displaying
-the site's own ads at the bottom of the page. Of course, this behaviour can be
-disabled too.
 
 Mangareader.net has undergone a redesign not long ago, and some of its manga kept
 the old URL format; this script can cater for both without any problems.
@@ -31,12 +23,26 @@ bad!
 
 Here is a changelog of the versions which were released from the beginning
 onwards. The version format is y.z: e.g. 10.354 is was released on the 354th day
-of 2010. The `.edge` versions are bleeding edge only.
+of 2010.
+
+11.30
+-----
+
+* BETA 0
+* No cache/
+* Not possible to change options.
+* Icons for nav panel.
+* Faster load, lighter footprint.
+* Fetches and displays manga description and details.
+* No navigation yet. Have to browse the site to select manga *and* chapters.
+
 
 <hr />
 
 Old [Hg] Versions
 =================
+
+The `.edge` versions are bleeding edge only.
 
 11.1
 ----
