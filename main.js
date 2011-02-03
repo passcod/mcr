@@ -31,8 +31,9 @@
 			  "author": "",
 			  "artist": "",
 			  "chapter": {
-				  "number": 0,
-				  "name": ""
+				  "number": 1,
+				  "name": "",
+				  "index": 0
 			  }
 		  }
 	  },
@@ -61,6 +62,7 @@
 		    $('#artist', n).text(MCR.Global.manga.artist);
 		    $('#cover', n).attr('src', MCR.Global.manga.cover);
 		    
+		    $('#permalink').attr('href', MCR.Tool.buildUrl(MCR.Global.request.manga, MCR.Global.request.chapter));
 		    $('#version').text(MCR_VERSION);
 		  }
 	  },
@@ -134,10 +136,11 @@
             "   </label></p>"+
             "   <p><label>"+
             "     <input type='checkbox' id='option-cache' value='on' />"+
-            "     Use cache. This makes loading a chapter previously visited faster,"+
-            "     hit Previous and re-read that last chapter quickly. Not recommended"+
-            "     on slow connections."+
+            "     Use cache. This makes loading a chapter previously visited faster."+
+            "     Now you can hit Previous and re-read that last chapter quickly."+
+            "     Not recommended on slow connections."+
             "   </label></p>"+
+            "   <p><a id='cache-button'>Manage Cache</a></p>"+
             "	</nav>"+
             " <nav id='info'>"+
             "   <img id='cover' />"+
@@ -148,6 +151,14 @@
             "   <p>Released since <date pubdate='pubdate'></date> and currently <i id='stat'></i></p>"+
             "   <p>Story by <b id='author'>author</b>, Art by <b id='artist'>artist</b>.</p>"+
             "   <p id='description'>Description</p>"+
+            " </nav>"+
+            " <nav id='cache'>"+
+            "   <p><a onclick='MCR.Do.panel.toggle(\"cache\")'>Hide</a></p>"+
+            "   <p>Storage used: <b id='storagesize'>0</b>%</p>"+
+            "   <p><label>"+
+            "     <input type='button' id='cache-clear' value='Clear' />"+
+            "     Clear the cache. Removes all cached chapters."+
+            "   </label></p>"+
             " </nav>"+
             " <article>"+
             "   <p>Loading...</p>"+
@@ -195,7 +206,7 @@
 	        "display": "block",
 	        "line-height": "24px"
         },
-        "nav#options": {
+        "nav#options, nav#cache": {
           "-moz-column-count": "2",
           "-moz-column-gap": "2em",
           "-moz-column-rule-style": "solid",
@@ -234,6 +245,10 @@
 	        "font-size": "0.7em",
 	        "margin": "1em auto",
 	        "text-align": "center"
+        },
+        "input[type=button]": {
+          "border": "1px solid",
+          "background-color": "transparent"
         },
         "a": {
 	        "color": "inherit",
@@ -326,7 +341,7 @@
 					    url+"</div>";
 					  
 					  if ( stat == 'timeout' ) {
-						  data += '<img src="/qwertyuiopasdfghjklzxcvbnm.404" alt="-" width="800" />';
+						  data += '<img src="/notfound.404" alt="-" width="800" />';
 					  }
             
             data += "</body></html>";
@@ -552,7 +567,7 @@
 			  "ads"          : "on" , // Display MR.net's ads
 	
 			  "cache"        : "off", // Use cache (and persist if localStorage)
-			  "cache-images" : "{}"   // Image cache store
+			  "cache-chapters" : "{}"   // Image cache store
 		  },
 		  
 		  /**
@@ -604,7 +619,7 @@
 			  MCR.Option[key] = value;
 			  if ( MCR.Tool.canHazStorage() ) {
 				  window.localStorage.setItem(MCR.Info.keyPrefix+key, MCR.Option[key]);
-				  $('#cachesize').text(MCR.Tool.storageUsed(true));
+				  $('#storagesize').text(MCR.Tool.storageUsed(true));
 			  }
 		  },
 
@@ -799,7 +814,7 @@
 		   * @return void
 		   */
 		  clear: function () {
-			  for ( i in MCR.Cache.store ) {
+			  for ( var i in MCR.Cache.store ) {
 				  MCR.Cache.set(i, {});
 			  }
 		  },
@@ -846,7 +861,7 @@
 	        status += ' / ';
 	      }
 	      
-			  document.title = status + MCR.Global.manga.title+' / '+MCR.Global.request.chapter;
+			  document.title = status + MCR.Global.manga.title+' / Ch. '+MCR.Global.request.chapter;
 		  },
 	
 		  /**
@@ -987,11 +1002,11 @@
 				  $('#options-button').click(MCR.Do.panel.toggle);
 				  $('#cache-button').click(function() {MCR.Do.panel.toggle('cache');});
 				  $('#info-button').click(function() {MCR.Do.panel.toggle('info');});
-				
+				  
 				  $('#chapters select').live('change', MCR.Get.selectedChapter);
 				  // Must be live: else it gets removed when the select is changed.
 	        
-				  $('#previous').click(MCR.Get.previousChapter);
+				  $('#prev').click(MCR.Get.previousChapter);
 				  $('#next').click(MCR.Get.nextChapter);
 				  
 				  $('#option-spacing').change(MCR.Do.toggle.spacing);
@@ -1007,6 +1022,9 @@
 				  MCR.Do.toggle.cache( MCR.Option.switched('cache') );
 				  MCR.Do.toggle.forced800( MCR.Option.switched('forced800') );
 				  MCR.Do.toggle.ads( MCR.Option.switched('ads') );
+				  
+				  
+				  $('#cache-clear').click(MCR.Cache.clear);
 			  },
 		
 			  /**
@@ -1066,13 +1084,13 @@
 						  MCR.TMP.page);
 				  },
 			
-				  updateSelect = function (chapter_list) {
+				  updateSelect = function () {
 					  // TODO
 				  },
 			    
 			    imgTag = function (page) {
-			      var t = MCR.Global.manga.title + '/' +
-				      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + '/' +
+			      var t = MCR.Global.manga.title + ' / ' +
+				      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + ' / ' +
 				      'Page ' + page;
 				    return "<img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' />\n";
 			    },
@@ -1084,11 +1102,23 @@
 					  }
 					  $('article').html(h);
 					  MCR.Do.displayStatus('Loaded');
+					  
+					  if ( MCR.Option.switched("cache") ) {
+					    var c = MCR.Cache.get('chapters');
+					    if ( !c[String(MCR.Global.request.manga)] ) {
+					      c[String(MCR.Global.request.manga)] = {};
+					    }
+					    c[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] = MCR.TMP.list;
+					    
+					    MCR.Cache.set('chapters', c);
+					  }
 				  },
 				  
-				  doPage1 = function (doc) {
+				  doPage1 = function (doc, cached) {
 				    
-				    $('article').html( imgTag(0) );
+				    if ( cached ) {} else {
+				      $('article').html( imgTag(0) );
+				    }
 				    
 				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
 				    var sss, ss, s = $('script:last', doc).contents().text();
@@ -1100,17 +1130,17 @@
 				    MCR.Global.manga.id = document['mangaid'];
 				    
 				    $.getJSON('/actions/selector/?id='+MCR.Global.manga.id+'&which=0', function(j) {
-				      updateSelect(j);
+				      MCR.Global.manga.chapters = j;
+				      
+				      updateSelect();
 				      
 				      var i, k;
-				      
 				      for ( i in j ) {
 				        k = j[i];
-				        if ( k.chapter == String(MCR.Global.request.chapter) ) {
+				        if ( String(k.chapter) == MCR.Global.request.chapter ) {
 				          MCR.Global.manga.chapter['name'] = j[i]['chapter_name'];
+				          MCR.Global.manga.chapter.index = i;
 				        }
-				        delete k['chapter'];
-				        MCR.Global.manga.chapters[ j[i]['chapter'] ] = k;
 				      }
 				      
 				      MCR.Info.show();
@@ -1134,7 +1164,7 @@
 					  MCR.Tool.getFake(makeUrl(), function (doc) {
 					    var disp = false,
 					        img = $('#img', doc);
-				      if ( typeof img.attr('src') !== 'undefined' && MCR.TMP.page <= 2 /* DEBUG */ ) {
+				      if ( typeof img.attr('src') !== 'undefined' /*&& MCR.TMP.page <= 2 /* DEBUG */ ) {
 			          MCR.TMP.list.push(img.attr('src'));
 			          if ( MCR.TMP.page == 1 ) {
 			            doPage1(doc);
@@ -1149,21 +1179,28 @@
 			  
 			  MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'...');
 			  
-			  /*if ( MCR.Option.switched("cache") ) {
+			  if ( MCR.Option.switched("cache") ) {
 				  // Cache is enabled
 				  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)] ) {
 					  // Cache has this manga
 					  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] ) {
 						  // Cache has this chapter
-						  updateDisplay(true);
+						  MCR.TMP.list = MCR.Cache.get('chapters')[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)];
+						  
+						  MCR.TMP.page = 1;
+						  MCR.Tool.getFake(makeUrl(), function (doc) {
+						    doPage1(doc, true);
+						  });
+						  
+						  updateDisplay();
 						  return;
 					  }
 				  }
-			  } else {*/
-			    MCR.TMP.list = [];
-				  MCR.TMP.page = 1;
-				  mainLoop();
-			  //}
+			  }
+			  
+		    MCR.TMP.list = [];
+			  MCR.TMP.page = 1;
+			  mainLoop();
 		  },
 	        
 	   // Chapter Switching
@@ -1175,10 +1212,10 @@
       },
 
       previousChapter: function() {
-	      var chi = MCR.Global.manga.chapterOrder.indexOf( MCR.Global.request.chapter );
-	
-	      if (MCR.Global.manga.chapterOrder[ chi - 1 ]) {
-		      MCR.Global.request.chapter = MCR.Global.manga.chapterOrder[ chi - 1 ];
+	      var chi = Number(MCR.Global.manga.chapter.index);
+	      
+	      if (MCR.Global.manga.chapters[ chi - 1 ]) {
+		      MCR.Global.request.chapter = MCR.Global.manga.chapters[ chi - 1 ]['chapter'];
 		      MCR.Get.chapter();
 	      } else {
 		      MCR.Do.displayStatus('This is the first Chapter');
@@ -1186,10 +1223,10 @@
       },
 
       nextChapter: function () {
-	      var chi = MCR.Global.manga.chapterOrder.indexOf( MCR.Global.request.chapter );
-	
-	      if (MCR.Global.manga.chapterOrder[ chi + 1 ]) {
-		      MCR.Global.request.chapter = MCR.Global.manga.chapterOrder[ chi + 1 ];
+	      var chi = Number(MCR.Global.manga.chapter.index);
+	      
+	      if (MCR.Global.manga.chapters[ chi + 1 ]) {
+		      MCR.Global.request.chapter = MCR.Global.manga.chapters[ chi + 1 ]['chapter'];
 		      MCR.Get.chapter();
 	      } else {
 		      MCR.Do.displayStatus('This is the last Chapter');
