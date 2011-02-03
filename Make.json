@@ -1,6 +1,5 @@
 {
   "script": [
-    "lib/json2.js",
     "lib/jquery.js",
     "nl",
     "lib/dom_parser.js",

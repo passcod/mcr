@@ -1,487 +1,4 @@
-var MCR_VERSION = '11.30';
-/*
-    http://www.JSON.org/json2.js
-    2010-11-17
-
-    Public Domain.
-
-    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
-
-    See http://www.JSON.org/js.html
-
-
-    This code should be minified before deployment.
-    See http://javascript.crockford.com/jsmin.html
-
-    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
-    NOT CONTROL.
-
-
-    This file creates a global JSON object containing two methods: stringify
-    and parse.
-
-        JSON.stringify(value, replacer, space)
-            value       any JavaScript value, usually an object or array.
-
-            replacer    an optional parameter that determines how object
-                        values are stringified for objects. It can be a
-                        function or an array of strings.
-
-            space       an optional parameter that specifies the indentation
-                        of nested structures. If it is omitted, the text will
-                        be packed without extra whitespace. If it is a number,
-                        it will specify the number of spaces to indent at each
-                        level. If it is a string (such as '\t' or '&nbsp;'),
-                        it contains the characters used to indent at each level.
-
-            This method produces a JSON text from a JavaScript value.
-
-            When an object value is found, if the object contains a toJSON
-            method, its toJSON method will be called and the result will be
-            stringified. A toJSON method does not serialize: it returns the
-            value represented by the name/value pair that should be serialized,
-            or undefined if nothing should be serialized. The toJSON method
-            will be passed the key associated with the value, and this will be
-            bound to the value
-
-            For example, this would serialize Dates as ISO strings.
-
-                Date.prototype.toJSON = function (key) {
-                    function f(n) {
-                        // Format integers to have at least two digits.
-                        return n < 10 ? '0' + n : n;
-                    }
-
-                    return this.getUTCFullYear()   + '-' +
-                         f(this.getUTCMonth() + 1) + '-' +
-                         f(this.getUTCDate())      + 'T' +
-                         f(this.getUTCHours())     + ':' +
-                         f(this.getUTCMinutes())   + ':' +
-                         f(this.getUTCSeconds())   + 'Z';
-                };
-
-            You can provide an optional replacer method. It will be passed the
-            key and value of each member, with this bound to the containing
-            object. The value that is returned from your method will be
-            serialized. If your method returns undefined, then the member will
-            be excluded from the serialization.
-
-            If the replacer parameter is an array of strings, then it will be
-            used to select the members to be serialized. It filters the results
-            such that only members with keys listed in the replacer array are
-            stringified.
-
-            Values that do not have JSON representations, such as undefined or
-            functions, will not be serialized. Such values in objects will be
-            dropped; in arrays they will be replaced with null. You can use
-            a replacer function to replace those with JSON values.
-            JSON.stringify(undefined) returns undefined.
-
-            The optional space parameter produces a stringification of the
-            value that is filled with line breaks and indentation to make it
-            easier to read.
-
-            If the space parameter is a non-empty string, then that string will
-            be used for indentation. If the space parameter is a number, then
-            the indentation will be that many spaces.
-
-            Example:
-
-            text = JSON.stringify(['e', {pluribus: 'unum'}]);
-            // text is '["e",{"pluribus":"unum"}]'
-
-
-            text = JSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
-            // text is '[\n\t"e",\n\t{\n\t\t"pluribus": "unum"\n\t}\n]'
-
-            text = JSON.stringify([new Date()], function (key, value) {
-                return this[key] instanceof Date ?
-                    'Date(' + this[key] + ')' : value;
-            });
-            // text is '["Date(---current time---)"]'
-
-
-        JSON.parse(text, reviver)
-            This method parses a JSON text to produce an object or array.
-            It can throw a SyntaxError exception.
-
-            The optional reviver parameter is a function that can filter and
-            transform the results. It receives each of the keys and values,
-            and its return value is used instead of the original value.
-            If it returns what it received, then the structure is not modified.
-            If it returns undefined then the member is deleted.
-
-            Example:
-
-            // Parse the text. Values that look like ISO date strings will
-            // be converted to Date objects.
-
-            myData = JSON.parse(text, function (key, value) {
-                var a;
-                if (typeof value === 'string') {
-                    a =
-/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
-                    if (a) {
-                        return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
-                            +a[5], +a[6]));
-                    }
-                }
-                return value;
-            });
-
-            myData = JSON.parse('["Date(09/09/2001)"]', function (key, value) {
-                var d;
-                if (typeof value === 'string' &&
-                        value.slice(0, 5) === 'Date(' &&
-                        value.slice(-1) === ')') {
-                    d = new Date(value.slice(5, -1));
-                    if (d) {
-                        return d;
-                    }
-                }
-                return value;
-            });
-
-
-    This is a reference implementation. You are free to copy, modify, or
-    redistribute.
-*/
-
-/*jslint evil: true, strict: false, regexp: false */
-
-/*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
-    call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
-    getUTCMinutes, getUTCMonth, getUTCSeconds, hasOwnProperty, join,
-    lastIndex, length, parse, prototype, push, replace, slice, stringify,
-    test, toJSON, toString, valueOf
-*/
-
-
-// Create a JSON object only if one does not already exist. We create the
-// methods in a closure to avoid creating global variables.
-
-if (!this.JSON) {
-    this.JSON = {};
-}
-
-(function () {
-    "use strict";
-
-    function f(n) {
-        // Format integers to have at least two digits.
-        return n < 10 ? '0' + n : n;
-    }
-
-    if (typeof Date.prototype.toJSON !== 'function') {
-
-        Date.prototype.toJSON = function (key) {
-
-            return isFinite(this.valueOf()) ?
-                   this.getUTCFullYear()   + '-' +
-                 f(this.getUTCMonth() + 1) + '-' +
-                 f(this.getUTCDate())      + 'T' +
-                 f(this.getUTCHours())     + ':' +
-                 f(this.getUTCMinutes())   + ':' +
-                 f(this.getUTCSeconds())   + 'Z' : null;
-        };
-
-        String.prototype.toJSON =
-        Number.prototype.toJSON =
-        Boolean.prototype.toJSON = function (key) {
-            return this.valueOf();
-        };
-    }
-
-    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        gap,
-        indent,
-        meta = {    // table of character substitutions
-            '\b': '\\b',
-            '\t': '\\t',
-            '\n': '\\n',
-            '\f': '\\f',
-            '\r': '\\r',
-            '"' : '\\"',
-            '\\': '\\\\'
-        },
-        rep;
-
-
-    function quote(string) {
-
-// If the string contains no control characters, no quote characters, and no
-// backslash characters, then we can safely slap some quotes around it.
-// Otherwise we must also replace the offending characters with safe escape
-// sequences.
-
-        escapable.lastIndex = 0;
-        return escapable.test(string) ?
-            '"' + string.replace(escapable, function (a) {
-                var c = meta[a];
-                return typeof c === 'string' ? c :
-                    '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-            }) + '"' :
-            '"' + string + '"';
-    }
-
-
-    function str(key, holder) {
-
-// Produce a string from holder[key].
-
-        var i,          // The loop counter.
-            k,          // The member key.
-            v,          // The member value.
-            length,
-            mind = gap,
-            partial,
-            value = holder[key];
-
-// If the value has a toJSON method, call it to obtain a replacement value.
-
-        if (value && typeof value === 'object' &&
-                typeof value.toJSON === 'function') {
-            value = value.toJSON(key);
-        }
-
-// If we were called with a replacer function, then call the replacer to
-// obtain a replacement value.
-
-        if (typeof rep === 'function') {
-            value = rep.call(holder, key, value);
-        }
-
-// What happens next depends on the value's type.
-
-        switch (typeof value) {
-        case 'string':
-            return quote(value);
-
-        case 'number':
-
-// JSON numbers must be finite. Encode non-finite numbers as null.
-
-            return isFinite(value) ? String(value) : 'null';
-
-        case 'boolean':
-        case 'null':
-
-// If the value is a boolean or null, convert it to a string. Note:
-// typeof null does not produce 'null'. The case is included here in
-// the remote chance that this gets fixed someday.
-
-            return String(value);
-
-// If the type is 'object', we might be dealing with an object or an array or
-// null.
-
-        case 'object':
-
-// Due to a specification blunder in ECMAScript, typeof null is 'object',
-// so watch out for that case.
-
-            if (!value) {
-                return 'null';
-            }
-
-// Make an array to hold the partial results of stringifying this object value.
-
-            gap += indent;
-            partial = [];
-
-// Is the value an array?
-
-            if (Object.prototype.toString.apply(value) === '[object Array]') {
-
-// The value is an array. Stringify every element. Use null as a placeholder
-// for non-JSON values.
-
-                length = value.length;
-                for (i = 0; i < length; i += 1) {
-                    partial[i] = str(i, value) || 'null';
-                }
-
-// Join all of the elements together, separated with commas, and wrap them in
-// brackets.
-
-                v = partial.length === 0 ? '[]' :
-                    gap ? '[\n' + gap +
-                            partial.join(',\n' + gap) + '\n' +
-                                mind + ']' :
-                          '[' + partial.join(',') + ']';
-                gap = mind;
-                return v;
-            }
-
-// If the replacer is an array, use it to select the members to be stringified.
-
-            if (rep && typeof rep === 'object') {
-                length = rep.length;
-                for (i = 0; i < length; i += 1) {
-                    k = rep[i];
-                    if (typeof k === 'string') {
-                        v = str(k, value);
-                        if (v) {
-                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
-                        }
-                    }
-                }
-            } else {
-
-// Otherwise, iterate through all of the keys in the object.
-
-                for (k in value) {
-                    if (Object.hasOwnProperty.call(value, k)) {
-                        v = str(k, value);
-                        if (v) {
-                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
-                        }
-                    }
-                }
-            }
-
-// Join all of the member texts together, separated with commas,
-// and wrap them in braces.
-
-            v = partial.length === 0 ? '{}' :
-                gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
-                        mind + '}' : '{' + partial.join(',') + '}';
-            gap = mind;
-            return v;
-        }
-    }
-
-// If the JSON object does not yet have a stringify method, give it one.
-
-    if (typeof JSON.stringify !== 'function') {
-        JSON.stringify = function (value, replacer, space) {
-
-// The stringify method takes a value and an optional replacer, and an optional
-// space parameter, and returns a JSON text. The replacer can be a function
-// that can replace values, or an array of strings that will select the keys.
-// A default replacer method can be provided. Use of the space parameter can
-// produce text that is more easily readable.
-
-            var i;
-            gap = '';
-            indent = '';
-
-// If the space parameter is a number, make an indent string containing that
-// many spaces.
-
-            if (typeof space === 'number') {
-                for (i = 0; i < space; i += 1) {
-                    indent += ' ';
-                }
-
-// If the space parameter is a string, it will be used as the indent string.
-
-            } else if (typeof space === 'string') {
-                indent = space;
-            }
-
-// If there is a replacer, it must be a function or an array.
-// Otherwise, throw an error.
-
-            rep = replacer;
-            if (replacer && typeof replacer !== 'function' &&
-                    (typeof replacer !== 'object' ||
-                     typeof replacer.length !== 'number')) {
-                throw new Error('JSON.stringify');
-            }
-
-// Make a fake root object containing our value under the key of ''.
-// Return the result of stringifying the value.
-
-            return str('', {'': value});
-        };
-    }
-
-
-// If the JSON object does not yet have a parse method, give it one.
-
-    if (typeof JSON.parse !== 'function') {
-        JSON.parse = function (text, reviver) {
-
-// The parse method takes a text and an optional reviver function, and returns
-// a JavaScript value if the text is a valid JSON text.
-
-            var j;
-
-            function walk(holder, key) {
-
-// The walk method is used to recursively walk the resulting structure so
-// that modifications can be made.
-
-                var k, v, value = holder[key];
-                if (value && typeof value === 'object') {
-                    for (k in value) {
-                        if (Object.hasOwnProperty.call(value, k)) {
-                            v = walk(value, k);
-                            if (v !== undefined) {
-                                value[k] = v;
-                            } else {
-                                delete value[k];
-                            }
-                        }
-                    }
-                }
-                return reviver.call(holder, key, value);
-            }
-
-
-// Parsing happens in four stages. In the first stage, we replace certain
-// Unicode characters with escape sequences. JavaScript handles many characters
-// incorrectly, either silently deleting them, or treating them as line endings.
-
-            text = String(text);
-            cx.lastIndex = 0;
-            if (cx.test(text)) {
-                text = text.replace(cx, function (a) {
-                    return '\\u' +
-                        ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-                });
-            }
-
-// In the second stage, we run the text against regular expressions that look
-// for non-JSON patterns. We are especially concerned with '()' and 'new'
-// because they can cause invocation, and '=' because it can cause mutation.
-// But just to be safe, we want to reject all unexpected forms.
-
-// We split the second stage into 4 regexp operations in order to work around
-// crippling inefficiencies in IE's and Safari's regexp engines. First we
-// replace the JSON backslash pairs with '@' (a non-JSON character). Second, we
-// replace all simple value tokens with ']' characters. Third, we delete all
-// open brackets that follow a colon or comma or that begin the text. Finally,
-// we look to see that the remaining characters are only whitespace or ']' or
-// ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
-
-            if (/^[\],:{}\s]*$/
-.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@')
-.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
-.replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-
-// In the third stage we use the eval function to compile the text into a
-// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
-// in JavaScript: it can begin a block or an object literal. We wrap the text
-// in parens to eliminate the ambiguity.
-
-                j = eval('(' + text + ')');
-
-// In the optional fourth stage, we recursively walk the new structure, passing
-// each name/value pair to a reviver function for possible transformation.
-
-                return typeof reviver === 'function' ?
-                    walk({'': j}, '') : j;
-            }
-
-// If the text is not JSON parseable, then a SyntaxError is thrown.
-
-            throw new SyntaxError('JSON.parse');
-        };
-    }
-}());
+var MCR_VERSION = '11.33';
 /*!
  * jQuery JavaScript Library v1.4.4
  * http://jquery.com/
@@ -745,8 +262,9 @@ Object.size = function (obj) {
 	   * Holds information about the script itself.
 	   */
 	  Info: {
-		  "version": MCR_VERSION,
-		  "keyPrefix": "MCR-",
+		  version: String(MCR_VERSION),
+		  keyPrefix: "mcr-",
+		  domain: window.location.host,
 		  
 		  /**
 		   * Updates the manga info panel and the version number.
@@ -777,7 +295,8 @@ Object.size = function (obj) {
 			  //                                        ( page )  (   manga   )          ( chap )
 			  //                                           [1]         [2]                  [3]
 			  "cur": /mangareader\.net\/([a-z0-9\-]+)(\/[0-9]+)?(\/[0-9]+)?/i
-			  //                           [1]      [2]        [3]
+			  //                        (   manga   )(  chap  ) (  page  )
+			  //                             [1]        [2]        [3]
 		  },
 		  "select": {
 			  //                        (   manga   )(  chap  ) (  page  )
@@ -811,7 +330,35 @@ Object.size = function (obj) {
             "		</span>"+
             "	</nav>"+
             "	<nav id='options'>"+
-            "   <p>Option Item 1</p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-spacing' value='on' />"+
+            "     Add spacing between pages to facilitate reading."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-black' value='off' />"+
+            "     Switch to dark skin."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-forced800' value='on' />"+
+            "     Force image width to 800. Provides a more uniform reading experience,"+
+            "     but you might want to disable if you can't read large pages."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-hotkeys' value='on' />"+
+            "     Enable hotkeys."+
+            "     <b>&lt;</b> for Previous and <b>&gt;</b> for Next."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-ads' value='on' />"+
+            "     Support MR.net! Display their ads at the bottom and click on them."+
+            "     You can always disable this. If you have an Ad Blocker, they won't appear anyway."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-cache' value='on' />"+
+            "     Use cache. This makes loading a chapter previously visited faster,"+
+            "     hit Previous and re-read that last chapter quickly. Not recommended"+
+            "     on slow connections."+
+            "   </label></p>"+
             "	</nav>"+
             " <nav id='info'>"+
             "   <img id='cover' />"+
@@ -820,7 +367,7 @@ Object.size = function (obj) {
             "     <h2>Chapter</h2>"+ // Chapter name
             "   </header>"+
             "   <p>Released since <date pubdate='pubdate'></date> and currently <i id='stat'></i></p>"+
-            "   <p>Story by <b id='author'>author</b>, Art by <b id='author'>author</b>.</p>"+
+            "   <p>Story by <b id='author'>author</b>, Art by <b id='artist'>artist</b>.</p>"+
             "   <p id='description'>Description</p>"+
             " </nav>"+
             " <article>"+
@@ -837,10 +384,7 @@ Object.size = function (obj) {
             "		  - Thanks for using!"+
             "     (v. <span id='version'></span>)"+
             "   </nav>"+
-            "	  <!--<div id='ads'>"+
-            "		  <iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
-            "	  	<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btright' class='right' />"+
-            "	  </div>-->"+
+            "	  <div id='ads'></div>"+
             "	</footer>"+
             "</div>",
       css: {
@@ -858,17 +402,33 @@ Object.size = function (obj) {
 	        "top": "50px",
 	        "left": "auto",
 	        "width": "780px",
-	        "border": "5px #CCC solid",
+	        "border": "5px solid",
 	        "padding": "5px",
 	        "display": "none",
+	        "opacity": "0.95",
 	        "position": "fixed",
-	        "font-size": "0.8em"
+	        "font-size": "0.8em",
+	        "text-align": "justify"
         },
         "nav#main": {
 	        "top": "0px",
 	        "height": "24px",
 	        "display": "block",
 	        "line-height": "24px"
+        },
+        "nav#options": {
+          "-moz-column-count": "2",
+          "-moz-column-gap": "2em",
+          "-moz-column-rule-style": "solid",
+          "-moz-column-rule-width": "1px",
+          "-webkit-column-count": "2",
+          "-webkit-column-gap": "2em",
+          "-webkit-column-rule-style": "solid",
+          "-webkit-column-rule-width": "1px",
+          "column-count": "2",
+          "column-gap": "2em",
+          "column-rule-style": "solid",
+          "column-rule-width": "1px"
         },
         "#chapters select": {
           "position": "relative",
@@ -913,12 +473,18 @@ Object.size = function (obj) {
         ".black": {
 	        "background-color": "black",
 	        "color": "white",
-	        "border-color": "white"
+	        "border-color": "white",
+	        "-moz-column-rule-color": "white",
+	        "-webkit-column-rule-color": "white",
+	        "column-rule-color": "white"
         },
         ".white": {
 	        "background-color": "white",
 	        "color": "black",
-	        "border-color": "black"
+	        "border-color": "black",
+	        "-moz-column-rule-color": "black",
+	        "-webkit-column-rule-color": "black",
+	        "column-rule-color": "black"
         },
         ".white select, select.white, .black select, select.black": {
 	        "color": "black"
@@ -1118,7 +684,7 @@ Object.size = function (obj) {
 			  chapter = chapter ? '/'+chapter : '';
 			  page = page ? '/'+page : '';
 	
-			  return 'http://www.mangareader.net'+manga+chapter+page;
+			  return 'http://'+MCR.Info.domain+manga+chapter+page;
 		  },
 
 		  /**
@@ -1200,17 +766,31 @@ Object.size = function (obj) {
 		   * The options/controls list and their default values.
 		   */
 		  defaults: {
-			  "spacing"      : "1em", // Page spacing
-			  "allblack"     : "off", // Background color
-			  "hotkeys"      : "off", // Hotkeys
-			  "showfirst"    : "off", // Show first page while loading a chapter
+			  "spacing"      : "on", // Page spacing (on = 1em, off = 0px)
+			  "black"        : "off", // Background color
+			  "hotkeys"      : "on", // Hotkeys
 			  "forced800"    : "on" , // Force img width to 800px
 			  "ads"          : "on" , // Display MR.net's ads
 	
 			  "cache"        : "off", // Use cache (and persist if localStorage)
 			  "cache-images" : "{}"   // Image cache store
 		  },
-		
+		  
+		  /**
+		   * Removes all stored items which do not start with the current prefix.
+		   * This can be used to force an option reset between versions.
+		   *
+		   * @return void
+		   */
+		  reset: function () {
+		    for ( var i in window.localStorage ) {
+		      var r = new RegExp(MCR.Info.keyPrefix.replace('-', ''));
+		      if ( !i.match(r) ) {
+		        window.localStorage.removeItem(i);
+		      }
+		    }
+		  },
+		  
 		  /**
 		   * Sets the default options/controls, as defined in MCR.Option.defaults, to
 		   * the stored (HTML5) value, or the default values if there is no stored value.
@@ -1218,9 +798,8 @@ Object.size = function (obj) {
 		   * @return void
 		   */
 		  init: function () {
-			  var key;
-	
-			  for ( key in MCR.Option.defaults ) {
+			  MCR.Option.reset();
+			  for ( var key in MCR.Option.defaults ) {
 				  if ( MCR.Tool.canHazStorage() ) {
 					  MCR.Option.values[key] = window.localStorage[MCR.Info.keyPrefix+key] ? window.localStorage[MCR.Info.keyPrefix+key] : MCR.Option.defaults[key];
 					  window.localStorage[MCR.Info.keyPrefix+key] = MCR.Option.values[key];
@@ -1245,8 +824,8 @@ Object.size = function (obj) {
 		  set: function (/** String */ key, /** String */ value) {
 			  MCR.Option[key] = value;
 			  if ( MCR.Tool.canHazStorage() ) {
-				  window.localStorage[MCR.Info.keyPrefix+key] = MCR.Option[key];
-				  $('#control-cachesize span').text(MCR.Tool.storageUsed(true));
+				  window.localStorage.setItem(MCR.Info.keyPrefix+key, MCR.Option[key]);
+				  $('#cachesize').text(MCR.Tool.storageUsed(true));
 			  }
 		  },
 
@@ -1262,7 +841,7 @@ Object.size = function (obj) {
 		  get: function (/** String */ key) {
 			  var value = MCR.Option[key];
 			  if ( MCR.Tool.canHazStorage() ) {
-				  value = window.localStorage[MCR.Info.keyPrefix+key];
+				  value = window.localStorage.getItem(MCR.Info.keyPrefix+key);
 			  }
 			  return value;
 		  },
@@ -1363,16 +942,16 @@ Object.size = function (obj) {
 					  callOn();
 				  }
 				  MCR.Option.switchOn(key);
-				  $('#legend-'+key+' .control-now').text('On');
+				  $('#option-'+key).attr('checked', true);
 			  } else {
 				  if ( callOff ) {
 					  callOff();
 				  }
 				  MCR.Option.switchOff(key);
-				  $('#legend-'+key+' .control-now').text('Off');
+				  $('#option-'+key).attr('checked', false);
 			  }
 		  },
-	
+		  
 		  /**
 		   * Holds the options values
 		   */
@@ -1483,31 +1062,19 @@ Object.size = function (obj) {
 			  } else {
 				  $('#status').stop().text(status).show();
 			  }
-	
-			  document.title = MCR.Global.manga.title+' / '+MCR.Global.request.chapter+' / '+status;
+	      
+	      if ( status.length > 0 ) {
+	        status += ' / ';
+	      }
+	      
+			  document.title = status + MCR.Global.manga.title+' / '+MCR.Global.request.chapter;
 		  },
 	
 		  /**
 		   * Holds controls functions which change a value.
 		   */
 		  change: {
-			  /**
-			   * Changes the spacing between two pages.
-			   *
-			   * @param force_to An integer value with em or px appended.
-			   *
-			   * @return void
-			   */
-			  spacing: function (/** String */ force_to) {
-				  if ( /[0-9]+(em|px)/i.test(force_to) ) {
-					  $('#pages img').css('margin-bottom', force_to);
-				  } else {
-					  var s = $('#control-spacing input').val();
-					  MCR.Option.set('spacing', s);
-					  $('#pages img').css('margin-bottom', s);
-				  }
-				  $('#legend-spacing .control-now').text(MCR.Option.get('spacing'));
-			  }
+			  //
 		  },
 	
 		  /**
@@ -1548,7 +1115,22 @@ Object.size = function (obj) {
 					  $(document).unbind('keydown', MCR.Do.handleHotkeys);
 				  });
 			  },
-		
+  		  
+  		  /**
+			   * Toggles betweeen 1em spacing between pages or none.
+			   * 
+			   * @param force_to True for 1em spacing
+			   *
+			   * @return void
+			   */
+			  spacing: function (/** Boolean */ force_to) {
+				  MCR.Option.toggle('spacing', force_to, function () {
+					  $('article img').css('margin-bottom', '1em');
+				  }, function () {
+					  $('article img').css('margin-bottom', '0px');
+				  });
+			  },
+  		  
 			  /**
 			   * Toggles betweeen black and white background, and white and black text.
 			   * 
@@ -1556,27 +1138,15 @@ Object.size = function (obj) {
 			   *
 			   * @return void
 			   */
-			  allBlack: function (/** Boolean */ force_to) {
+			  black: function (/** Boolean */ force_to) {
 				  var a = $('[class*=white], [class*=black]');
-				  MCR.Option.toggle('allblack', force_to, function () {
+				  MCR.Option.toggle('black', force_to, function () {
 					  a.addClass('black').removeClass('white');
 				  }, function () {
 					  a.addClass('white').removeClass('black');
 				  });
 			  },
-		
-			  /**
-			   * When enabled, the first page of a chapter is displayed while the rest
-			   * loads.
-			   *
-			   * @param force_to True to enable
-			   *
-			   * @return void
-			   */
-			  showFirst: function (/** Boolean */ force_to) {
-				  MCR.Option.toggle('showfirst', force_to);
-			  },
-		
+		    		
 			  /**
 			   * Enable cache. Persistence requires HTML5 Local Storage,
 			   * ie. Firefox 3.6+ or Chrome 9+.
@@ -1599,9 +1169,9 @@ Object.size = function (obj) {
 			   */
 			  forced800: function (/** Boolean */ force_to) {
 				  MCR.Option.toggle('forced800', force_to, function () {
-					  $('#pages').addClass('forced800');
+					  $('article').addClass('forced800');
 				  }, function () {
-					  $('#pages').removeClass('forced800');
+					  $('article').removeClass('forced800');
 				  });
 			  },
 		
@@ -1614,9 +1184,12 @@ Object.size = function (obj) {
 			   */
 			  ads: function(/** Boolean */ force_to) {
 				  MCR.Option.toggle('ads', force_to, function () {
-					  $('#adfooter').show();
+					  $('#ads').html(
+					    "		  <iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
+              "	  	<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btright' class='right' />"
+					  ).show();
 				  }, function () {
-					  $('#adfooter').hide();
+					  $('#ads').html("").hide();
 				  });	
 			  }
 		  },
@@ -1633,22 +1206,25 @@ Object.size = function (obj) {
 			   */
 			  init: function() {	
 				  $('#options-button').click(MCR.Do.panel.toggle);
-				
-				  $('#chapters select').live('change', MCR.Get.selectedChapter);
-				  // Must be live: else it gets removed when the select is changed.
-				
-				  $('#previous').click(MCR.Get.previousChapter);
-				  $('#next').click(MCR.Get.nextChapter);
-				
 				  $('#cache-button').click(function() {MCR.Do.panel.toggle('cache');});
 				  $('#info-button').click(function() {MCR.Do.panel.toggle('info');});
 				
-				
-				  MCR.Do.change.spacing( MCR.Option.get('spacing') );
-	
-				  MCR.Do.toggle.allBlack( MCR.Option.switched('allblack') );
+				  $('#chapters select').live('change', MCR.Get.selectedChapter);
+				  // Must be live: else it gets removed when the select is changed.
+	        
+				  $('#previous').click(MCR.Get.previousChapter);
+				  $('#next').click(MCR.Get.nextChapter);
+				  
+				  $('#option-spacing').change(MCR.Do.toggle.spacing);
+				  $('#option-black').change(MCR.Do.toggle.black);
+				  $('#option-hotkeys').change(MCR.Do.toggle.hotkeys);
+				  $('#option-cache').change(MCR.Do.toggle.cache);
+				  $('#option-forced800').change(MCR.Do.toggle.forced800);
+				  $('#option-ads').change(MCR.Do.toggle.ads);
+				  
+				  MCR.Do.toggle.spacing( MCR.Option.switched('spacing') );
+				  MCR.Do.toggle.black( MCR.Option.switched('black') );
 				  MCR.Do.toggle.hotkeys( MCR.Option.switched('hotkeys') );
-				  MCR.Do.toggle.showFirst( MCR.Option.switched('showfirst') );
 				  MCR.Do.toggle.cache( MCR.Option.switched('cache') );
 				  MCR.Do.toggle.forced800( MCR.Option.switched('forced800') );
 				  MCR.Do.toggle.ads( MCR.Option.switched('ads') );
@@ -1711,24 +1287,30 @@ Object.size = function (obj) {
 						  MCR.TMP.page);
 				  },
 			
-				  updateSelect = function (doc) {
-					  //
+				  updateSelect = function (chapter_list) {
+					  // TODO
 				  },
-			
+			    
+			    imgTag = function (page) {
+			      var t = MCR.Global.manga.title + '/' +
+				      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + '/' +
+				      'Page ' + page;
+				    return "<img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' />\n";
+			    },
+			    
 				  updateDisplay = function (use_cache) {
 					  var i, h = "", t;
 					  for ( i in MCR.TMP.list ) {
-					    t = MCR.Global.manga.title + '/' +
-					      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + '/' +
-					      'Page ' + i;
-					    h += "<img src='"+MCR.TMP.list[i]+"' alt='"+i+"' title='"+i+"' />\n";
+					    h += imgTag(i);
 					  }
 					  $('article').html(h);
 					  MCR.Do.displayStatus('Loaded');
 				  },
 				  
 				  doPage1 = function (doc) {
-				    // display first page if opt is on (TODO)
+				    
+				    $('article').html( imgTag(0) );
+				    
 				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
 				    var sss, ss, s = $('script:last', doc).contents().text();
 				    s = s.split("\n");
@@ -1773,7 +1355,7 @@ Object.size = function (obj) {
 					  MCR.Tool.getFake(makeUrl(), function (doc) {
 					    var disp = false,
 					        img = $('#img', doc);
-				      if ( typeof img.attr('src') != 'undefined' ) {
+				      if ( typeof img.attr('src') !== 'undefined' && MCR.TMP.page <= 2 /* DEBUG */ ) {
 			          MCR.TMP.list.push(img.attr('src'));
 			          if ( MCR.TMP.page == 1 ) {
 			            doPage1(doc);
