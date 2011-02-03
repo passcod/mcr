@@ -1,4 +1,4 @@
-var MCR_VERSION = 11.30;
+var MCR_VERSION = 11.33;
 /** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
 if (typeof DOMParser === 'undefined') {
   DOMParser = function () {};
@@ -92,8 +92,9 @@ Object.size = function (obj) {
 	   * Holds information about the script itself.
 	   */
 	  Info: {
-		  "version": MCR_VERSION,
-		  "keyPrefix": "MCR-",
+		  version: String(MCR_VERSION),
+		  keyPrefix: "mcr-",
+		  domain: window.location.host,
 		  
 		  /**
 		   * Updates the manga info panel and the version number.
@@ -124,7 +125,8 @@ Object.size = function (obj) {
 			  //                                        ( page )  (   manga   )          ( chap )
 			  //                                           [1]         [2]                  [3]
 			  "cur": /mangareader\.net\/([a-z0-9\-]+)(\/[0-9]+)?(\/[0-9]+)?/i
-			  //                           [1]      [2]        [3]
+			  //                        (   manga   )(  chap  ) (  page  )
+			  //                             [1]        [2]        [3]
 		  },
 		  "select": {
 			  //                        (   manga   )(  chap  ) (  page  )
@@ -158,7 +160,35 @@ Object.size = function (obj) {
             "		</span>"+
             "	</nav>"+
             "	<nav id='options'>"+
-            "   <p>Option Item 1</p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-spacing' value='on' />"+
+            "     Add spacing between pages to facilitate reading."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-black' value='off' />"+
+            "     Switch to dark skin."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-forced800' value='on' />"+
+            "     Force image width to 800. Provides a more uniform reading experience,"+
+            "     but you might want to disable if you can't read large pages."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-hotkeys' value='on' />"+
+            "     Enable hotkeys."+
+            "     <b>&lt;</b> for Previous and <b>&gt;</b> for Next."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-ads' value='on' />"+
+            "     Support MR.net! Display their ads at the bottom and click on them."+
+            "     You can always disable this. If you have an Ad Blocker, they won't appear anyway."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-cache' value='on' />"+
+            "     Use cache. This makes loading a chapter previously visited faster,"+
+            "     hit Previous and re-read that last chapter quickly. Not recommended"+
+            "     on slow connections."+
+            "   </label></p>"+
             "	</nav>"+
             " <nav id='info'>"+
             "   <img id='cover' />"+
@@ -167,7 +197,7 @@ Object.size = function (obj) {
             "     <h2>Chapter</h2>"+ // Chapter name
             "   </header>"+
             "   <p>Released since <date pubdate='pubdate'></date> and currently <i id='stat'></i></p>"+
-            "   <p>Story by <b id='author'>author</b>, Art by <b id='author'>author</b>.</p>"+
+            "   <p>Story by <b id='author'>author</b>, Art by <b id='artist'>artist</b>.</p>"+
             "   <p id='description'>Description</p>"+
             " </nav>"+
             " <article>"+
@@ -184,10 +214,7 @@ Object.size = function (obj) {
             "		  - Thanks for using!"+
             "     (v. <span id='version'></span>)"+
             "   </nav>"+
-            "	  <!--<div id='ads'>"+
-            "		  <iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
-            "	  	<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btright' class='right' />"+
-            "	  </div>-->"+
+            "	  <div id='ads'></div>"+
             "	</footer>"+
             "</div>",
       css: {
@@ -205,17 +232,33 @@ Object.size = function (obj) {
 	        "top": "50px",
 	        "left": "auto",
 	        "width": "780px",
-	        "border": "5px #CCC solid",
+	        "border": "5px solid",
 	        "padding": "5px",
 	        "display": "none",
+	        "opacity": "0.95",
 	        "position": "fixed",
-	        "font-size": "0.8em"
+	        "font-size": "0.8em",
+	        "text-align": "justify"
         },
         "nav#main": {
 	        "top": "0px",
 	        "height": "24px",
 	        "display": "block",
 	        "line-height": "24px"
+        },
+        "nav#options": {
+          "-moz-column-count": "2",
+          "-moz-column-gap": "2em",
+          "-moz-column-rule-style": "solid",
+          "-moz-column-rule-width": "1px",
+          "-webkit-column-count": "2",
+          "-webkit-column-gap": "2em",
+          "-webkit-column-rule-style": "solid",
+          "-webkit-column-rule-width": "1px",
+          "column-count": "2",
+          "column-gap": "2em",
+          "column-rule-style": "solid",
+          "column-rule-width": "1px"
         },
         "#chapters select": {
           "position": "relative",
@@ -260,12 +303,18 @@ Object.size = function (obj) {
         ".black": {
 	        "background-color": "black",
 	        "color": "white",
-	        "border-color": "white"
+	        "border-color": "white",
+	        "-moz-column-rule-color": "white",
+	        "-webkit-column-rule-color": "white",
+	        "column-rule-color": "white"
         },
         ".white": {
 	        "background-color": "white",
 	        "color": "black",
-	        "border-color": "black"
+	        "border-color": "black",
+	        "-moz-column-rule-color": "black",
+	        "-webkit-column-rule-color": "black",
+	        "column-rule-color": "black"
         },
         ".white select, select.white, .black select, select.black": {
 	        "color": "black"
@@ -465,7 +514,7 @@ Object.size = function (obj) {
 			  chapter = chapter ? '/'+chapter : '';
 			  page = page ? '/'+page : '';
 	
-			  return 'http://www.mangareader.net'+manga+chapter+page;
+			  return 'http://'+MCR.Info.domain+manga+chapter+page;
 		  },
 
 		  /**
@@ -547,17 +596,31 @@ Object.size = function (obj) {
 		   * The options/controls list and their default values.
 		   */
 		  defaults: {
-			  "spacing"      : "1em", // Page spacing
-			  "allblack"     : "off", // Background color
-			  "hotkeys"      : "off", // Hotkeys
-			  "showfirst"    : "off", // Show first page while loading a chapter
+			  "spacing"      : "on", // Page spacing (on = 1em, off = 0px)
+			  "black"        : "off", // Background color
+			  "hotkeys"      : "on", // Hotkeys
 			  "forced800"    : "on" , // Force img width to 800px
 			  "ads"          : "on" , // Display MR.net's ads
 	
 			  "cache"        : "off", // Use cache (and persist if localStorage)
 			  "cache-images" : "{}"   // Image cache store
 		  },
-		
+		  
+		  /**
+		   * Removes all stored items which do not start with the current prefix.
+		   * This can be used to force an option reset between versions.
+		   *
+		   * @return void
+		   */
+		  reset: function () {
+		    for ( var i in window.localStorage ) {
+		      var r = new RegExp(MCR.Info.keyPrefix.replace('-', ''));
+		      if ( !i.match(r) ) {
+		        window.localStorage.removeItem(i);
+		      }
+		    }
+		  },
+		  
 		  /**
 		   * Sets the default options/controls, as defined in MCR.Option.defaults, to
 		   * the stored (HTML5) value, or the default values if there is no stored value.
@@ -565,9 +628,8 @@ Object.size = function (obj) {
 		   * @return void
 		   */
 		  init: function () {
-			  var key;
-	
-			  for ( key in MCR.Option.defaults ) {
+			  MCR.Option.reset();
+			  for ( var key in MCR.Option.defaults ) {
 				  if ( MCR.Tool.canHazStorage() ) {
 					  MCR.Option.values[key] = window.localStorage[MCR.Info.keyPrefix+key] ? window.localStorage[MCR.Info.keyPrefix+key] : MCR.Option.defaults[key];
 					  window.localStorage[MCR.Info.keyPrefix+key] = MCR.Option.values[key];
@@ -592,8 +654,8 @@ Object.size = function (obj) {
 		  set: function (/** String */ key, /** String */ value) {
 			  MCR.Option[key] = value;
 			  if ( MCR.Tool.canHazStorage() ) {
-				  window.localStorage[MCR.Info.keyPrefix+key] = MCR.Option[key];
-				  $('#control-cachesize span').text(MCR.Tool.storageUsed(true));
+				  window.localStorage.setItem(MCR.Info.keyPrefix+key, MCR.Option[key]);
+				  $('#cachesize').text(MCR.Tool.storageUsed(true));
 			  }
 		  },
 
@@ -609,7 +671,7 @@ Object.size = function (obj) {
 		  get: function (/** String */ key) {
 			  var value = MCR.Option[key];
 			  if ( MCR.Tool.canHazStorage() ) {
-				  value = window.localStorage[MCR.Info.keyPrefix+key];
+				  value = window.localStorage.getItem(MCR.Info.keyPrefix+key);
 			  }
 			  return value;
 		  },
@@ -710,16 +772,16 @@ Object.size = function (obj) {
 					  callOn();
 				  }
 				  MCR.Option.switchOn(key);
-				  $('#legend-'+key+' .control-now').text('On');
+				  $('#option-'+key).attr('checked', true);
 			  } else {
 				  if ( callOff ) {
 					  callOff();
 				  }
 				  MCR.Option.switchOff(key);
-				  $('#legend-'+key+' .control-now').text('Off');
+				  $('#option-'+key).attr('checked', false);
 			  }
 		  },
-	
+		  
 		  /**
 		   * Holds the options values
 		   */
@@ -830,31 +892,19 @@ Object.size = function (obj) {
 			  } else {
 				  $('#status').stop().text(status).show();
 			  }
-	
-			  document.title = MCR.Global.manga.title+' / '+MCR.Global.request.chapter+' / '+status;
+	      
+	      if ( status.length > 0 ) {
+	        status += ' / ';
+	      }
+	      
+			  document.title = status + MCR.Global.manga.title+' / '+MCR.Global.request.chapter;
 		  },
 	
 		  /**
 		   * Holds controls functions which change a value.
 		   */
 		  change: {
-			  /**
-			   * Changes the spacing between two pages.
-			   *
-			   * @param force_to An integer value with em or px appended.
-			   *
-			   * @return void
-			   */
-			  spacing: function (/** String */ force_to) {
-				  if ( /[0-9]+(em|px)/i.test(force_to) ) {
-					  $('#pages img').css('margin-bottom', force_to);
-				  } else {
-					  var s = $('#control-spacing input').val();
-					  MCR.Option.set('spacing', s);
-					  $('#pages img').css('margin-bottom', s);
-				  }
-				  $('#legend-spacing .control-now').text(MCR.Option.get('spacing'));
-			  }
+			  //
 		  },
 	
 		  /**
@@ -895,7 +945,22 @@ Object.size = function (obj) {
 					  $(document).unbind('keydown', MCR.Do.handleHotkeys);
 				  });
 			  },
-		
+  		  
+  		  /**
+			   * Toggles betweeen 1em spacing between pages or none.
+			   * 
+			   * @param force_to True for 1em spacing
+			   *
+			   * @return void
+			   */
+			  spacing: function (/** Boolean */ force_to) {
+				  MCR.Option.toggle('spacing', force_to, function () {
+					  $('article img').css('margin-bottom', '1em');
+				  }, function () {
+					  $('article img').css('margin-bottom', '0px');
+				  });
+			  },
+  		  
 			  /**
 			   * Toggles betweeen black and white background, and white and black text.
 			   * 
@@ -903,27 +968,15 @@ Object.size = function (obj) {
 			   *
 			   * @return void
 			   */
-			  allBlack: function (/** Boolean */ force_to) {
+			  black: function (/** Boolean */ force_to) {
 				  var a = $('[class*=white], [class*=black]');
-				  MCR.Option.toggle('allblack', force_to, function () {
+				  MCR.Option.toggle('black', force_to, function () {
 					  a.addClass('black').removeClass('white');
 				  }, function () {
 					  a.addClass('white').removeClass('black');
 				  });
 			  },
-		
-			  /**
-			   * When enabled, the first page of a chapter is displayed while the rest
-			   * loads.
-			   *
-			   * @param force_to True to enable
-			   *
-			   * @return void
-			   */
-			  showFirst: function (/** Boolean */ force_to) {
-				  MCR.Option.toggle('showfirst', force_to);
-			  },
-		
+		    		
 			  /**
 			   * Enable cache. Persistence requires HTML5 Local Storage,
 			   * ie. Firefox 3.6+ or Chrome 9+.
@@ -946,9 +999,9 @@ Object.size = function (obj) {
 			   */
 			  forced800: function (/** Boolean */ force_to) {
 				  MCR.Option.toggle('forced800', force_to, function () {
-					  $('#pages').addClass('forced800');
+					  $('article').addClass('forced800');
 				  }, function () {
-					  $('#pages').removeClass('forced800');
+					  $('article').removeClass('forced800');
 				  });
 			  },
 		
@@ -961,9 +1014,12 @@ Object.size = function (obj) {
 			   */
 			  ads: function(/** Boolean */ force_to) {
 				  MCR.Option.toggle('ads', force_to, function () {
-					  $('#adfooter').show();
+					  $('#ads').html(
+					    "		  <iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btleft' class='left' />"+
+              "	  	<iframe width='350' height='250' frameborder='no' scrolling='no' src='http://ad.mangareader.net/btright' class='right' />"
+					  ).show();
 				  }, function () {
-					  $('#adfooter').hide();
+					  $('#ads').html("").hide();
 				  });	
 			  }
 		  },
@@ -980,22 +1036,25 @@ Object.size = function (obj) {
 			   */
 			  init: function() {	
 				  $('#options-button').click(MCR.Do.panel.toggle);
-				
-				  $('#chapters select').live('change', MCR.Get.selectedChapter);
-				  // Must be live: else it gets removed when the select is changed.
-				
-				  $('#previous').click(MCR.Get.previousChapter);
-				  $('#next').click(MCR.Get.nextChapter);
-				
 				  $('#cache-button').click(function() {MCR.Do.panel.toggle('cache');});
 				  $('#info-button').click(function() {MCR.Do.panel.toggle('info');});
 				
-				
-				  MCR.Do.change.spacing( MCR.Option.get('spacing') );
-	
-				  MCR.Do.toggle.allBlack( MCR.Option.switched('allblack') );
+				  $('#chapters select').live('change', MCR.Get.selectedChapter);
+				  // Must be live: else it gets removed when the select is changed.
+	        
+				  $('#previous').click(MCR.Get.previousChapter);
+				  $('#next').click(MCR.Get.nextChapter);
+				  
+				  $('#option-spacing').change(MCR.Do.toggle.spacing);
+				  $('#option-black').change(MCR.Do.toggle.black);
+				  $('#option-hotkeys').change(MCR.Do.toggle.hotkeys);
+				  $('#option-cache').change(MCR.Do.toggle.cache);
+				  $('#option-forced800').change(MCR.Do.toggle.forced800);
+				  $('#option-ads').change(MCR.Do.toggle.ads);
+				  
+				  MCR.Do.toggle.spacing( MCR.Option.switched('spacing') );
+				  MCR.Do.toggle.black( MCR.Option.switched('black') );
 				  MCR.Do.toggle.hotkeys( MCR.Option.switched('hotkeys') );
-				  MCR.Do.toggle.showFirst( MCR.Option.switched('showfirst') );
 				  MCR.Do.toggle.cache( MCR.Option.switched('cache') );
 				  MCR.Do.toggle.forced800( MCR.Option.switched('forced800') );
 				  MCR.Do.toggle.ads( MCR.Option.switched('ads') );
@@ -1058,24 +1117,30 @@ Object.size = function (obj) {
 						  MCR.TMP.page);
 				  },
 			
-				  updateSelect = function (doc) {
-					  //
+				  updateSelect = function (chapter_list) {
+					  // TODO
 				  },
-			
+			    
+			    imgTag = function (page) {
+			      var t = MCR.Global.manga.title + '/' +
+				      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + '/' +
+				      'Page ' + page;
+				    return "<img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' />\n";
+			    },
+			    
 				  updateDisplay = function (use_cache) {
 					  var i, h = "", t;
 					  for ( i in MCR.TMP.list ) {
-					    t = MCR.Global.manga.title + '/' +
-					      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + '/' +
-					      'Page ' + i;
-					    h += "<img src='"+MCR.TMP.list[i]+"' alt='"+i+"' title='"+i+"' />\n";
+					    h += imgTag(i);
 					  }
 					  $('article').html(h);
 					  MCR.Do.displayStatus('Loaded');
 				  },
 				  
 				  doPage1 = function (doc) {
-				    // display first page if opt is on (TODO)
+				    
+				    $('article').html( imgTag(0) );
+				    
 				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
 				    var sss, ss, s = $('script:last', doc).contents().text();
 				    s = s.split("\n");
@@ -1120,7 +1185,7 @@ Object.size = function (obj) {
 					  MCR.Tool.getFake(makeUrl(), function (doc) {
 					    var disp = false,
 					        img = $('#img', doc);
-				      if ( typeof img.attr('src') != 'undefined' ) {
+				      if ( typeof img.attr('src') !== 'undefined' && MCR.TMP.page <= 2 /* DEBUG */ ) {
 			          MCR.TMP.list.push(img.attr('src'));
 			          if ( MCR.TMP.page == 1 ) {
 			            doPage1(doc);
