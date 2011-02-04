@@ -1,4 +1,4 @@
-var MCR_VERSION = '11.34';
+var MCR_VERSION = '11.35';
 /*!
  * jQuery JavaScript Library v1.4.4
  * http://jquery.com/
@@ -1569,11 +1569,4 @@ $(function (){
   MCR.Info.show();
   
 	MCR.Get.chapter();
-	
-	alert(""+
-	  "This is a pre-release (beta) version. "+
-	  "As such, features may be broken or missing. "+
-	  "Please do not report these as bugs."+
-	  "Check often for updates. "
-	);
 });

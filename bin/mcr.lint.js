@@ -1,4 +1,4 @@
-var MCR_VERSION = 11.34;
+var MCR_VERSION = 11.35;
 /** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
 if (typeof DOMParser === 'undefined') {
   DOMParser = function () {};
@@ -1399,11 +1399,4 @@ $(function (){
   MCR.Info.show();
   
 	MCR.Get.chapter();
-	
-	alert(""+
-	  "This is a pre-release (beta) version. "+
-	  "As such, features may be broken or missing. "+
-	  "Please do not report these as bugs."+
-	  "Check often for updates. "
-	);
 });
