@@ -167,8 +167,19 @@ Object.size = function (obj) {
             "     Add spacing between pages to facilitate reading."+
             "   </label></p>"+
             "   <p><label>"+
+            "     <input type='checkbox' id='option-horizontal' value='off' />"+
+            "     Horizontal reading. Not recommended for small screens less"+
+            "     than 1200px high."+
+            "   </label></p>"+
+            "   <p><label>"+
             "     <input type='checkbox' id='option-black' value='off' />"+
             "     Switch to dark skin."+
+            "   </label></p>"+
+            "   <p><label>"+
+            "     <input type='checkbox' id='option-timeout' value='on' />"+
+            "     Timeout image loading to 5s. On fast connections, this will decrease"+
+            "     loading time. However, do not use on slow connections as pages"+
+            "     will be missing."+
             "   </label></p>"+
             "   <p><label>"+
             "     <input type='checkbox' id='option-forced800' value='on' />"+
@@ -211,9 +222,8 @@ Object.size = function (obj) {
             "     Clear the cache. Removes all cached chapters."+
             "   </label></p>"+
             " </nav>"+
-            " <article>"+
-            "   <p>Loading...</p>"+
-            "   <div style='height: 300px'>DEBUG</div>"+
+            " <article class='spaced'>"+
+            "   <ul><li>Loading...</li></ul>"+
             " </article>"+
             "	<footer>"+
             "   <nav>"+
@@ -286,9 +296,6 @@ Object.size = function (obj) {
         "article": {
 	        "text-align": "center"
         },
-        "article img": {
-	        "margin-bottom": "1em"
-        },
         ".forced800 img": {
 	        "width": "800px"
         },
@@ -339,12 +346,29 @@ Object.size = function (obj) {
         },
         "footer #ads .right": {
 	        "float": "right"
+        },
+        "article ul": {
+          "list-style": "none",
+          "padding": "0"
+        },
+        ".horizontal ul": {
+          "margin": "0 0 1em 0",
+          "padding": "0",
+          "float": "left",
+          "width": "100%"
+        },
+        ".horizontal li": {
+          "float": "left"
+        },
+        ".spaced img": {
+          "margin-bottom": "1em"
+        },
+        ".horizontal.spaced li": {
+          "padding": "0.5em"
         }
       },
       
       init: function () {
-        MCR.UI.css["article img"]["margin-bottom"] = MCR.Option.get('spacing');
-        
         $('body').append(MCR.UI.html).add('nav').addClass('white');
         $('#pre').remove();
         MCR.Tool.addCss(MCR.UI.css);
@@ -369,6 +393,10 @@ Object.size = function (obj) {
 		    var defaults = {
 		      timeout: 5000
 		    };
+		    
+		    if ( !MCR.Option.switched('timeout') ) {
+		      defaults.timeout = false;
+		    }
 		    
 		    if ( typeof settings === 'undefined' ) {
 		      settings = {};
@@ -612,7 +640,9 @@ Object.size = function (obj) {
 		   */
 		  defaults: {
 			  "spacing"      : "on", // Page spacing (on = 1em, off = 0px)
+			  "horizontal"   : "off", // Horizontal reading
 			  "black"        : "off", // Background color
+			  "timeout"      : "on", // 5s Timeout
 			  "hotkeys"      : "on", // Hotkeys
 			  "forced800"    : "on" , // Force img width to 800px
 			  "ads"          : "on" , // Display MR.net's ads
@@ -705,9 +735,9 @@ Object.size = function (obj) {
 		   */
 		  switchTo: function (/** String */ key, /** Boolean */ to) {
 			  var before = MCR.Option.get(key),
-				  onff   = to ? 'on' : 'off';
+				  onff   = to ? 'n' : 'f';
 	
-			  if ( /o(n|ff)/i.test(before) ) {
+			  if ( /o?(n|ff?)/i.test(before) ) {
 				  MCR.Option.set(key, onff);
 			  } else {
 				  throw TypeError;
@@ -752,8 +782,8 @@ Object.size = function (obj) {
 		  switched: function(/** String */ key) {
 			  var opt = MCR.Option.get(key);
 	
-			  if ( /o(n|ff)/i.test(opt) ) {
-				  if ( opt == 'on' ) {
+			  if ( /o?(n|ff?)/i.test(opt) ) {
+				  if ( /o?n/i.test(opt) ) {
 					  return true;
 				  }
 			  } else {
@@ -970,9 +1000,34 @@ Object.size = function (obj) {
 			   */
 			  spacing: function (/** Boolean */ force_to) {
 				  MCR.Option.toggle('spacing', force_to, function () {
-					  $('article img').css('margin-bottom', '1em');
+					  $('article').addClass('spaced');
 				  }, function () {
-					  $('article img').css('margin-bottom', '0px');
+					  $('article').removeClass('spaced');
+				  });
+			  },
+			  
+			  /**
+			   * Toggles betweeen 1em spacing between pages or none.
+			   * 
+			   * @param force_to True for horizontal reading
+			   *
+			   * @return void
+			   */
+			  horizontal: function (/** Boolean */ force_to) {
+				  MCR.Option.toggle('horizontal', force_to, function () {
+					  $('article').addClass('horizontal');
+					  
+					  MCR.TMP.width = 0;
+				    $('article img').each(function() {
+				      var w = $(this).width();
+				      if ( w < 800 ) { w = 800; }
+				      MCR.TMP.width += w + 20;
+				    });
+				    
+				    $('article ul').css('width', MCR.TMP.width);
+				  }, function () {
+					  $('article').removeClass('horizontal');
+					  $('article ul').css('width', '');
 				  });
 			  },
   		  
@@ -990,6 +1045,17 @@ Object.size = function (obj) {
 				  }, function () {
 					  a.addClass('white').removeClass('black');
 				  });
+			  },
+		    
+		    /**
+			   * Enable a 5s timeout on Ajax requests.
+			   *
+			   * @param force_to True to enable
+			   *
+			   * @return void
+			   */
+			  timeout: function (/** Boolean */ force_to) {
+				  MCR.Option.toggle('timeout', force_to);
 			  },
 		    		
 			  /**
@@ -1061,14 +1127,18 @@ Object.size = function (obj) {
 				  $('#next').click(MCR.Get.nextChapter);
 				  
 				  $('#option-spacing').change(MCR.Do.toggle.spacing);
+				  $('#option-horizontal').change(MCR.Do.toggle.horizontal);
 				  $('#option-black').change(MCR.Do.toggle.black);
+				  $('#option-timeout').change(MCR.Do.toggle.timeout);
 				  $('#option-hotkeys').change(MCR.Do.toggle.hotkeys);
 				  $('#option-cache').change(MCR.Do.toggle.cache);
 				  $('#option-forced800').change(MCR.Do.toggle.forced800);
 				  $('#option-ads').change(MCR.Do.toggle.ads);
 				  
 				  MCR.Do.toggle.spacing( MCR.Option.switched('spacing') );
+				  MCR.Do.toggle.horizontal( MCR.Option.switched('horizontal') );
 				  MCR.Do.toggle.black( MCR.Option.switched('black') );
+				  MCR.Do.toggle.timeout( MCR.Option.switched('timeout') );
 				  MCR.Do.toggle.hotkeys( MCR.Option.switched('hotkeys') );
 				  MCR.Do.toggle.cache( MCR.Option.switched('cache') );
 				  MCR.Do.toggle.forced800( MCR.Option.switched('forced800') );
@@ -1142,8 +1212,10 @@ Object.size = function (obj) {
 			    imgTag = function (page) {
 			      var t = MCR.Global.manga.title + ' / ' +
 				      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + ' / ' +
-				      'Page ' + page;
-				    return "<img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' />\n";
+				      'Page ' + page,
+				      
+				        s = MCR.Option.switched('spacing') ? 'margin-bottom: 1em;' : 'margin-bottom: 0px;';
+				    return "<li><img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' style='"+s+"' /></li>\n";
 			    },
 			    
 				  updateDisplay = function (use_cache) {
@@ -1151,8 +1223,19 @@ Object.size = function (obj) {
 					  for ( i in MCR.TMP.list ) {
 					    h += imgTag(i);
 					  }
-					  $('article').html(h);
+					  $('article ul').html(h);
 					  MCR.Do.displayStatus('Loaded');
+					  
+					  if ( MCR.Option.switched("horizontal") ) {
+					    MCR.TMP.width = 0;
+					    $('article img').each(function() {
+					      var w = $(this).width();
+					      if ( w < 800 ) { w = 800; }
+					      MCR.TMP.width += w + 20;
+					    });
+					    
+					    $('article ul').width(MCR.TMP.width);
+					  }
 					  
 					  if ( MCR.Option.switched("cache") ) {
 					    var c = MCR.Cache.get('chapters');
@@ -1168,7 +1251,7 @@ Object.size = function (obj) {
 				  doPage1 = function (doc, cached) {
 				    
 				    if ( cached ) {} else {
-				      $('article').html( imgTag(0) );
+				      $('article ul').html( imgTag(0) );
 				    }
 				    
 				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
@@ -1312,14 +1395,9 @@ $(function (){
 	MCR.Get.chapter();
 	
 	alert(""+
-	  "This is a pre-release (beta) version. Check often for updates.\n\nAs such, features may be broken or missing. "+
-	  "Please do not report these as bugs. Refer to the release notes below:"+
-	  "\n\n"+
-	  "* No cache.\n"+
-	  "* Not possible to change options.\n"+
-    "* Icons for nav panel.\n"+
-    "* Faster load, lighter footprint.\n"+
-    "* Fetches and displays manga description and details.\n"+
-    "* No navigation yet. Have to browse the site to select manga *and* chapters.\n"
+	  "This is a pre-release (beta) version. "+
+	  "As such, features may be broken or missing. "+
+	  "Please do not report these as bugs."+
+	  "Check often for updates. "
 	);
 });
