@@ -148,7 +148,7 @@ Object.size = function (obj) {
 	    html: ""+
             "<div id='container'>"+
             "	<nav id='main'>"+
-            "		<span id='chapters' class='white'><select><option>---</option></select></span>"+
+            "		<span class='white'><select id='chapters'><option>---</option></select></span>"+
             "		<span id='links'>"+
             "			<a href='/'><img alt='Home' title='Home' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAAZQTFRFAPBjgICA886xlAAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH2wEdDjQOfTITRAAAADdJREFUCNdjYIABCSCWAWI7IH4PxPcbGBj3HmBgr3/AwPb/AwPv/x0M1v//MLD/f4DAHzAxGgAAlVoaeSJXjhgAAAAASUVORK5CYII=' /></a>"+
             "			<a id='info-button'><img alt='Manga' title='Manga Info' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sBHQ4yNO1kbXAAAAKOSURBVEjHvZYxaxVBFIW/E7QKpFAkihZRMGBAiGChhdi8zvgHDFiJxKQV27n3RzyNnSCxtFE7KxF8pUE0SMCUUUQLwSrKsXBWXjb7YkR0YIudvTNzz5lzz134x0N7DSylIP0Mt01mAhARRMSfH1BKITOJiBnbi8BZAEnY3gJWgX5mrjWxXWOsPdFkI2m6lDKw/VrSkqQp4JDtQ5JOAkuS3pRSXkg6vicEDdxSygJwR5KBJ8B8RHxpIZyQtGJ7riZ0IyKW22jUQc0CcFvSZ9u9zHzZhbJBWkqZBZ5KOmB7MTOXOxHUBdO230r6ZPu0pM1mo4i4bvuupC3bRzPz49DaI7ZfAQclnbC90aAYax3Ql2Tbvdbm47bv1tD9wGIL1KakXlXYg06KIuKU7TeSHkfE5Q7q3gHNZV7MzGcd1D0C5mzPZObaNgS2l6rO57tUlZknJN2UdCkzn43Q/ny98KVfamw0DwwkTUXE4Y7sr0k6VhMRsJGZ90YU43vb65l5AWDfUPFg+2unlqVpoAecqe/PgXsdcc0e+3cUWmMDIyR5C3g4ROe3vVrMWOMttrckjQ9Rtu0OgH22d/Uq20gal7S17YAqq1Xbk6WUiVG+stuoayZsT9pebRIb9qK+JCSt/IU7r1S6+9sOiAgyc832wPZcRMyONK/WXQ1bhqQ5YBARazsKrfI+DbwFPkk6DWxW8/vedl5JRIQaqwBe2d5hFepQzQJw2/ZnSb2IePmbRjQLPK0+dCMiln/bcBq7rpk+BuZtfxnuaMAEsFJpAbgK3G9XuHbpZMdtP5B0rn760BSipHHbk3V+IOlKRGzsqaM13FUez9ueAfq214GP9VmvqpupMRt/9WfQZWy7Nfr/On4AGaxzz0yjBboAAAAASUVORK5CYII=' /></a>"+
@@ -281,7 +281,7 @@ Object.size = function (obj) {
           "column-rule-style": "solid",
           "column-rule-width": "1px"
         },
-        "#chapters select": {
+        "#chapters": {
           "position": "relative",
           "top": "-6px"
         },
@@ -1120,7 +1120,7 @@ Object.size = function (obj) {
 				  $('#cache-button').click(function() {MCR.Do.panel.toggle('cache');});
 				  $('#info-button').click(function() {MCR.Do.panel.toggle('info');});
 				  
-				  $('#chapters select').live('change', MCR.Get.selectedChapter);
+				  $('select#chapters').live('change', MCR.Get.selectedChapter);
 				  // Must be live: else it gets removed when the select is changed.
 	        
 				  $('#prev').click(MCR.Get.previousChapter);
@@ -1206,7 +1206,13 @@ Object.size = function (obj) {
 				  },
 			
 				  updateSelect = function () {
-					  // TODO
+					  var c, html = "";
+					  for ( var i in MCR.Global.manga.chapters ) {
+					    c = MCR.Global.manga.chapter.index == i ? ' selected="selected" ' : ' ';
+					    console.debug(MCR.Global.manga.chapter.index, i, c);
+					    html += "<option value='"+MCR.Global.manga.chapters[i]['chapter']+"'"+c+">"+MCR.Global.manga.chapters[i]['chapter']+"\n";
+					  }
+					  $('#chapters').html(html);
 				  },
 			    
 			    imgTag = function (page) {
@@ -1266,8 +1272,6 @@ Object.size = function (obj) {
 				    $.getJSON('/actions/selector/?id='+MCR.Global.manga.id+'&which=0', function(j) {
 				      MCR.Global.manga.chapters = j;
 				      
-				      updateSelect();
-				      
 				      var i, k;
 				      for ( i in j ) {
 				        k = j[i];
@@ -1276,6 +1280,8 @@ Object.size = function (obj) {
 				          MCR.Global.manga.chapter.index = i;
 				        }
 				      }
+				      
+				      updateSelect();
 				      
 				      MCR.Info.show();
 				    });
