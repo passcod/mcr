@@ -18,11 +18,4 @@ $(function (){
   MCR.Info.show();
   
 	MCR.Get.chapter();
-	
-	alert(""+
-	  "This is a pre-release (beta) version. "+
-	  "As such, features may be broken or missing. "+
-	  "Please do not report these as bugs."+
-	  "Check often for updates. "
-	);
 });
