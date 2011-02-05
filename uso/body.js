@@ -7,7 +7,7 @@ if ( regular.test(window.location) || old.test(window.location) ) {
 	
 	document.getElementsByTagName('body')[0].innerHTML = '<p id="pre">Loading...</p>';
 	var script = document.createElement('script');
-	var src = document.createTextNode(base64_decode(GetIt()));
+	var src = document.createTextNode(Base64.decode(GetIt()));
 	script.appendChild(src);
 	script.type = "text/javascript";
 	document.getElementsByTagName('body')[0].appendChild(script);

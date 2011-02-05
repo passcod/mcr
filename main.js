@@ -658,7 +658,7 @@
 		   *
 		   * @depends MCR.Tool.canHazStorage()
 		   *
-		   * @param key The key of the option to retrieve.
+		   * @param key The key of the cooption to retrieve.
 		   *
 		   * @return {String} The option's value.
 		   */
@@ -1158,7 +1158,6 @@
 					  var c, html = "";
 					  for ( var i in MCR.Global.manga.chapters ) {
 					    c = MCR.Global.manga.chapter.index == i ? ' selected="selected" ' : ' ';
-					    console.debug(MCR.Global.manga.chapter.index, i, c);
 					    html += "<option value='"+MCR.Global.manga.chapters[i]['chapter']+"'"+c+">"+MCR.Global.manga.chapters[i]['chapter']+"\n";
 					  }
 					  $('#chapters').html(html);
@@ -1179,7 +1178,7 @@
 					    h += imgTag(i);
 					  }
 					  $('article ul').html(h);
-					  MCR.Do.displayStatus('Loaded');
+					  MCR.Do.displayStatus('');
 					  
 					  if ( MCR.Option.switched("horizontal") ) {
 					    MCR.TMP.width = 0;
