@@ -34,6 +34,14 @@ Here is a changelog of the versions which were released from the beginning
 onwards. The version format is y.z: e.g. 10.354 is was released on the 354th day
 of 2010.
 
+11.35b
+------
+
+* STABLE
+* Chrome compatible
+* Removed some debug output
+
+
 11.35
 -----
 

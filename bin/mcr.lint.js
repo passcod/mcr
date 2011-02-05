@@ -1,4 +1,4 @@
-var MCR_VERSION = 11.35;
+var MCR_VERSION = 11.35b;
 /** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
 if (typeof DOMParser === 'undefined') {
   DOMParser = function () {};
@@ -709,7 +709,7 @@ Object.size = function (obj) {
 		   *
 		   * @depends MCR.Tool.canHazStorage()
 		   *
-		   * @param key The key of the option to retrieve.
+		   * @param key The key of the cooption to retrieve.
 		   *
 		   * @return {String} The option's value.
 		   */
@@ -1209,7 +1209,6 @@ Object.size = function (obj) {
 					  var c, html = "";
 					  for ( var i in MCR.Global.manga.chapters ) {
 					    c = MCR.Global.manga.chapter.index == i ? ' selected="selected" ' : ' ';
-					    console.debug(MCR.Global.manga.chapter.index, i, c);
 					    html += "<option value='"+MCR.Global.manga.chapters[i]['chapter']+"'"+c+">"+MCR.Global.manga.chapters[i]['chapter']+"\n";
 					  }
 					  $('#chapters').html(html);
@@ -1230,7 +1229,7 @@ Object.size = function (obj) {
 					    h += imgTag(i);
 					  }
 					  $('article ul').html(h);
-					  MCR.Do.displayStatus('Loaded');
+					  MCR.Do.displayStatus('');
 					  
 					  if ( MCR.Option.switched("horizontal") ) {
 					    MCR.TMP.width = 0;
