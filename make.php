@@ -1,5 +1,7 @@
 <?php
 
+include "lib/a85.php";
+
 $version = chop(file_get_contents('VERSION'));
 $compile = json_decode(file_get_contents('Make.json'), true);
 
@@ -38,7 +40,17 @@ file_put_contents('bin/mcr.js', $js);
 
 system('jsmin <bin/mcr.js >bin/mcr.min.js');
 
-$b64 = base64_encode(file_get_contents('bin/mcr.min.js'));
+$ascii85 = new ASCII85();
+
+$a85 = json_encode(
+  str_replace(
+    "\n",
+    "",
+    $ascii85->encode(
+      file_get_contents('bin/mcr.min.js')
+    )
+  )
+);
 
 $userjs = "";
 
@@ -52,10 +64,9 @@ foreach ( $compile['userjs'] as $file ) {
   }
 }
 
-$userjs .= "\n\nfunction GetIt() { return '".$b64."'; }";
+$userjs .= "\n\nfunction GetIt() { return ".$a85."; }";
 
 file_put_contents('bin/mcr.user.js', $userjs);
-
 
 $lintage = "var MCR_VERSION = ".$version.";\n";
 

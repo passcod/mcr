@@ -1,4 +1,4 @@
-var MCR_VERSION = '11.35b';
+var MCR_VERSION = '11.36';
 /*!
  * jQuery JavaScript Library v1.4.4
  * http://jquery.com/
