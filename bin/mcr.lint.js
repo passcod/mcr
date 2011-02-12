@@ -1,4 +1,4 @@
-var MCR_VERSION = 11.36;
+var MCR_VERSION = 11.43;
 /** @see https://sites.google.com/a/van-steenbeek.net/archive/explorer_domparser_parsefromstring */
 if (typeof DOMParser === 'undefined') {
   DOMParser = function () {};

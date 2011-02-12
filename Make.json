@@ -5,6 +5,7 @@
     "lib/dom_parser.js",
     "lib/object_size.js",
     "nl",
+    "LICENSE",
     "nl",
     "main.js",
     "nl",
@@ -15,7 +16,7 @@
     "ver",
     "uso/head_1.js",
     "nl",
-    "lib/a85.min.js",
+    "LICENSE",
     "nl",
     "uso/body.js"
   ],
