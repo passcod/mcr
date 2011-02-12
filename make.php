@@ -1,6 +1,8 @@
 <?php
 
-include "lib/a85.php";
+date_default_timezone_set('Pacific/Auckland');
+
+include "lib/jsmin.php";
 
 $version = chop(file_get_contents('VERSION'));
 $compile = json_decode(file_get_contents('Make.json'), true);
@@ -38,19 +40,9 @@ foreach ( $compile['script'] as $file ) {
 
 file_put_contents('bin/mcr.js', $js);
 
-system('jsmin <bin/mcr.js >bin/mcr.min.js');
+file_put_contents('bin/mcr.min.js', JSMin::minify($js));
 
-$ascii85 = new ASCII85();
-
-$a85 = json_encode(
-  str_replace(
-    "\n",
-    "",
-    $ascii85->encode(
-      file_get_contents('bin/mcr.min.js')
-    )
-  )
-);
+$jse = json_encode(file_get_contents('bin/mcr.min.js'));
 
 $userjs = "";
 
@@ -64,7 +56,7 @@ foreach ( $compile['userjs'] as $file ) {
   }
 }
 
-$userjs .= "\n\nfunction GetIt() { return ".$a85."; }";
+$userjs .= "\n\nfunction GetIt() { return ".$jse."; }";
 
 file_put_contents('bin/mcr.user.js', $userjs);
 

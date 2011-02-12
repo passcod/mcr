@@ -34,6 +34,13 @@ Here is a changelog of the versions which were released from the beginning
 onwards. The version format is y.z: e.g. 10.354 is was released on the 354th day
 of 2010.
 
+11.43
+-----
+
+* LTS
+* Optimization: From Base64 to Ascii85 to, finally, just json. Improves size and speed.
+* Added custom license.
+
 11.35b
 ------
 
