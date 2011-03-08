@@ -318,6 +318,7 @@
       },
       
       init: function () {
+        $('body > *').not('script, #container').remove();
         $('body').append(MCR.UI.html).add('nav').addClass('white');
         $('#pre').remove();
         MCR.Tool.addCss(MCR.UI.css);
@@ -1172,12 +1173,13 @@
 				    return "<li><img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' style='"+s+"' /></li>\n";
 			    },
 			    
-				  updateDisplay = function (use_cache) {
+				  updateDisplay = function () {
 					  var i, h = "", t;
 					  for ( i in MCR.TMP.list ) {
 					    h += imgTag(i);
 					  }
 					  $('article ul').html(h);
+					  window.scroll(0,0);
 					  MCR.Do.displayStatus('');
 					  
 					  if ( MCR.Option.switched("horizontal") ) {
@@ -1213,7 +1215,12 @@
 				    s = s.split("\n");
 				    ss = s.indexOf("function omvKeyPressed(e) {");
 				    sss = s.splice(0, ss).join("\n");
-				    eval(sss);
+				    
+				    var s = $('script:last', doc).contents().text(),
+				        ss = s.split("\n"),
+				        sss = ss.indexOf("function omvKeyPressed(e) {"),
+				        ssss = ss.splice(0, sss).join("\n");
+				    eval(ssss);
 				    
 				    MCR.Global.manga.id = document['mangaid'];
 				    
