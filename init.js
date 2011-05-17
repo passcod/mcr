@@ -12,7 +12,6 @@ $(function (){
 	
   MCR.UI.init();
 	MCR.Option.init();
-	MCR.Cache.init();
 	MCR.Do.panel.init();
   
   MCR.Info.show();

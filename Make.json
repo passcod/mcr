@@ -19,14 +19,5 @@
     "LICENSE",
     "nl",
     "uso/body.js"
-  ],
-  "lintage": [
-    "lib/dom_parser.js",
-    "lib/object_size.js",
-    "nl",
-    "nl",
-    "main.js",
-    "nl",
-    "init.js"
   ]
 }

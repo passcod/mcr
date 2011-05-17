@@ -1,4 +1,5 @@
-var MCR_VERSION = '11.66';
+var MCR_VERSION = '11.137';
+
 /*!
  * jQuery JavaScript Library v1.4.4
  * http://jquery.com/
@@ -218,7 +219,7 @@ Object.size = function (obj) {
 
 
 /*
- * Copyright (c) 2010- Felix Saparelli  (aka. passcod)
+ * Copyright (c) 2010- Felix "passcod" Saparelli
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -310,7 +311,7 @@ Object.size = function (obj) {
 	  },
 
 	  /**
-	   * Holds all/most regexes used in one place.
+	   * Holds commonly used regexes in one place.
 	   */
 	  Regex: {
 		  "url": {
@@ -355,27 +356,23 @@ Object.size = function (obj) {
             "	<nav id='options'>"+
             "   <p><label>"+
             "     <input type='checkbox' id='option-spacing' value='on' />"+
-            "     Add spacing between pages to facilitate reading."+
+            "     Add spacing between pages."+
             "   </label></p>"+
             "   <p><label>"+
             "     <input type='checkbox' id='option-horizontal' value='off' />"+
-            "     Horizontal reading. Not recommended for small screens less"+
-            "     than 1200px high."+
+            "     Horizontal reading. Minimum comfortable screen height 768px,"+
+            "     recommended 1200px."+
             "   </label></p>"+
             "   <p><label>"+
-            "     <input type='checkbox' id='option-black' value='off' />"+
-            "     Switch to dark skin."+
+            "     <input type='checkbox' id='option-black' value='on' />"+
+            "     Light or dark?"+
             "   </label></p>"+
             "   <p><label>"+
-            "     <input type='checkbox' id='option-timeout' value='on' />"+
-            "     Timeout image loading to 5s. On fast connections, this will decrease"+
-            "     loading time. However, do not use on slow connections as pages"+
-            "     will be missing."+
-            "   </label></p>"+
-            "   <p><label>"+
-            "     <input type='checkbox' id='option-forced800' value='on' />"+
-            "     Force image width to 800. Provides a more uniform reading experience,"+
-            "     but you might want to disable if you can't read large pages."+
+            "     <input type='checkbox' id='option-forced800' value='off' />"+
+            "     Force image width to 800. Provides a more uniform reading"+
+            "     experience (in vertical mode), but you might want to disable"+
+            "     it if the text is too small to read. In horizontal mode, it"+
+            "     is better to disable it."+
             "   </label></p>"+
             "   <p><label>"+
             "     <input type='checkbox' id='option-hotkeys' value='on' />"+
@@ -384,16 +381,9 @@ Object.size = function (obj) {
             "   </label></p>"+
             "   <p><label>"+
             "     <input type='checkbox' id='option-ads' value='on' />"+
-            "     Support MR.net! Display their ads at the bottom and click on them."+
-            "     You can always disable this. If you have an Ad Blocker, they won't appear anyway."+
+            "     Support MR.net! Display their ads at the bottom and click on"+
+            "     them. If you have an Ad Blocker, they won't appear anyway."+
             "   </label></p>"+
-            "   <p><label>"+
-            "     <input type='checkbox' id='option-cache' value='on' />"+
-            "     Use cache. This makes loading a chapter previously visited faster."+
-            "     Now you can hit Previous and re-read that last chapter quickly."+
-            "     Not recommended on slow connections."+
-            "   </label></p>"+
-            "   <p><a id='cache-button'>Manage Cache</a></p>"+
             "	</nav>"+
             " <nav id='info'>"+
             "   <img id='cover' />"+
@@ -405,24 +395,16 @@ Object.size = function (obj) {
             "   <p>Story by <b id='author'>author</b>, Art by <b id='artist'>artist</b>.</p>"+
             "   <p id='description'>Description</p>"+
             " </nav>"+
-            " <nav id='cache'>"+
-            "   <p><a onclick='MCR.Do.panel.toggle(\"cache\")'>Hide</a></p>"+
-            "   <p>Storage used: <b id='storagesize'>0</b>%</p>"+
-            "   <p><label>"+
-            "     <input type='button' id='cache-clear' value='Clear' />"+
-            "     Clear the cache. Removes all cached chapters."+
-            "   </label></p>"+
-            " </nav>"+
             " <article class='spaced'>"+
-            "   <ul><li>Loading...</li></ul>"+
+            "   <ul><li><img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sBHQ4yNO1kbXAAAAKOSURBVEjHvZYxaxVBFIW/E7QKpFAkihZRMGBAiGChhdi8zvgHDFiJxKQV27n3RzyNnSCxtFE7KxF8pUE0SMCUUUQLwSrKsXBWXjb7YkR0YIudvTNzz5lzz134x0N7DSylIP0Mt01mAhARRMSfH1BKITOJiBnbi8BZAEnY3gJWgX5mrjWxXWOsPdFkI2m6lDKw/VrSkqQp4JDtQ5JOAkuS3pRSXkg6vicEDdxSygJwR5KBJ8B8RHxpIZyQtGJ7riZ0IyKW22jUQc0CcFvSZ9u9zHzZhbJBWkqZBZ5KOmB7MTOXOxHUBdO230r6ZPu0pM1mo4i4bvuupC3bRzPz49DaI7ZfAQclnbC90aAYax3Ql2Tbvdbm47bv1tD9wGIL1KakXlXYg06KIuKU7TeSHkfE5Q7q3gHNZV7MzGcd1D0C5mzPZObaNgS2l6rO57tUlZknJN2UdCkzn43Q/ny98KVfamw0DwwkTUXE4Y7sr0k6VhMRsJGZ90YU43vb65l5AWDfUPFg+2unlqVpoAecqe/PgXsdcc0e+3cUWmMDIyR5C3g4ROe3vVrMWOMttrckjQ9Rtu0OgH22d/Uq20gal7S17YAqq1Xbk6WUiVG+stuoayZsT9pebRIb9qK+JCSt/IU7r1S6+9sOiAgyc832wPZcRMyONK/WXQ1bhqQ5YBARazsKrfI+DbwFPkk6DWxW8/vedl5JRIQaqwBe2d5hFepQzQJw2/ZnSb2IePmbRjQLPK0+dCMiln/bcBq7rpk+BuZtfxnuaMAEsFJpAbgK3G9XuHbpZMdtP5B0rn760BSipHHbk3V+IOlKRGzsqaM13FUez9ueAfq214GP9VmvqpupMRt/9WfQZWy7Nfr/On4AGaxzz0yjBboAAAAASUVORK5CYII=' /> Loading...</li></ul>"+
             " </article>"+
             "	<footer>"+
             "   <nav>"+
-            " 		Userscript by <a href='http://passcod.cz.cc'>passcod</a>"+
+            " 		Userscript by <a href='http://passcod.net'>passcod</a>"+
             " 		- Uses <a href='http://jquery.com'>jQuery</a>"+
             " 		- Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>"+
             "     - Fork me on <a href='https://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
-            " 		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a> + Attribution"+
+            " 		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a>"+
             "		  - Thanks for using!"+
             "     (v. <span id='version'></span>)"+
             "   </nav>"+
@@ -447,10 +429,13 @@ Object.size = function (obj) {
 	        "border": "5px solid",
 	        "padding": "5px",
 	        "display": "none",
-	        "opacity": "0.95",
+	        "opacity": "0.2",
 	        "position": "fixed",
 	        "font-size": "0.8em",
 	        "text-align": "justify"
+        },
+        "#container > nav:hover": {
+          "opacity": "0.85"
         },
         "nav#main": {
 	        "top": "0px",
@@ -458,7 +443,7 @@ Object.size = function (obj) {
 	        "display": "block",
 	        "line-height": "24px"
         },
-        "nav#options, nav#cache": {
+        "nav#options": {
           "-moz-column-count": "2",
           "-moz-column-gap": "2em",
           "-moz-column-rule-style": "solid",
@@ -577,23 +562,10 @@ Object.size = function (obj) {
 		   * 
 		   * @param url        The request URL
 		   * @param callback   An optional function to execute when the request is complete.
-		   * @param settings   Custom settings for the $.ajax function. (TODO)
 		   * 
 		   * @return void
 		   */
-		  getFake: function (/** String */ url, /** Function */ callback, /** Object */ settings) {
-		    var defaults = {
-		      timeout: 5000
-		    };
-		    
-		    if ( !MCR.Option.switched('timeout') ) {
-		      defaults.timeout = false;
-		    }
-		    
-		    if ( typeof settings === 'undefined' ) {
-		      settings = {};
-		    }
-		    
+		  getFake: function (/** String */ url, /** Function */ callback) {
 			  $.ajax({
 				  type: "GET",
 				  url: url,
@@ -625,8 +597,7 @@ Object.size = function (obj) {
 					    
 						  callback(doc);
 					  }
-				  },
-				  timeout: settings['timeout'] ? settings['timeout'] : defaults['timeout']
+				  }
 			  });
 		  },
 
@@ -831,17 +802,13 @@ Object.size = function (obj) {
 		   * The options/controls list and their default values.
 		   */
 		  defaults: {
-			  "spacing"      : "on", // Page spacing (on = 1em, off = 0px)
+			  "spacing"      : "on" , // Page spacing (on = 1em, off = 0px)
 			  "horizontal"   : "off", // Horizontal reading
-			  "black"        : "off", // Background color
-			  "timeout"      : "on", // 5s Timeout
-			  "hotkeys"      : "on", // Hotkeys
-			  "forced800"    : "on" , // Force img width to 800px
+			  "black"        : "on" , // Background color
+			  "hotkeys"      : "on" , // Hotkeys
+			  "forced800"    : "off", // Force img width to 800px
 			  "ads"          : "on" , // Display MR.net's ads
-	
-			  "cache"        : "off", // Use cache (and persist if localStorage)
-			  "cache-chapters" : "{}"   // Image cache store
-		  },
+      },
 		  
 		  /**
 		   * Removes all stored items which do not start with the current prefix.
@@ -877,11 +844,10 @@ Object.size = function (obj) {
 		  },
 		
 		  /**
-		   * Sets an option and refreshes the cachesize display. For boolean options, see
+		   * Sets an option. For boolean options, see
 		   * MCR.Option.switchTo().
 		   * 
 		   * @depends MCR.Tool.canHazStorage()
-		   * @depends MCR.Tool.storageUsed()
 		   *
 		   * @param key   The option's key.
 		   * @param value The option's value.
@@ -892,7 +858,6 @@ Object.size = function (obj) {
 			  MCR.Option[key] = value;
 			  if ( MCR.Tool.canHazStorage() ) {
 				  window.localStorage.setItem(MCR.Info.keyPrefix+key, MCR.Option[key]);
-				  $('#storagesize').text(MCR.Tool.storageUsed(true));
 			  }
 		  },
 
@@ -1026,85 +991,6 @@ Object.size = function (obj) {
 	  },
 
 	  /**
-	   * Contains cache related functions and stores.
-	   */
-	  Cache: {
-		  init: function () {
-			  if ( MCR.Option.switched('cache') ) {
-				  MCR.Cache.store.chapters = MCR.Cache.get('chapters');
-			  }
-		  },
-		
-		  /**
-		   * Set the value of a cache store. The value can be of any JSON-able type.
-		   *
-		   * @depend JSON.stringify()
-		   * @depend MCR.Option.set()
-		   *
-		   * @param key   The cache store key
-		   * @param value The cache store value
-		   *
-		   * @return void
-		   */
-		  set: function (/** String */ key, /** Mixed */ value) {
-			  var json = JSON.stringify(value);
-			  MCR.Option.set('cache-'+key, json);
-		  },
-	
-		  /**
-		   * Get the value of a cache store.
-		   *
-		   * @depend JSON.parse()
-		   * @depend MCR.Option.get()
-		   *
-		   * @param key The cache store key
-		   *
-		   * @return {Mixed} The cache store value.
-		   */
-		  get: function (/** String */ key) {
-			  var json = MCR.Option.get('cache-'+key);
-			  return JSON.parse(json);
-		  },
-	
-		  /**
-		   * Checks the cache for the queried information and returns true if it is
-		   * indeed cached.
-		   *
-		   * @depend MCR.Cache.get()
-		   *
-		   * @param key   The cache store key
-		   * @param query The query.
-		   *
-		   * @return {Boolean}
-		   */
-		  d: function (/** String */ key, /** Object */ query) {
-			  return false;
-		  },
-	
-		  /**
-		   * Clears all cache stores
-		   *
-		   * @return void
-		   */
-		  clear: function () {
-			  for ( var i in MCR.Cache.store ) {
-				  MCR.Cache.set(i, {});
-			  }
-		  },
-	
-		  /**
-		   * Holds all cache stores
-		   */
-		  store: {
-			  /**
-			   * The chapters store holds the image URL lists for all manga chapters
-			   * already requested.
-			   */
-			  chapters: {}
-		  }
-	  },
-
-	  /**
 	   * Holds functions that are used to control the interface and behaviour of the
 	   * script.
 	   */
@@ -1123,7 +1009,7 @@ Object.size = function (obj) {
 			    animate = true;
 			  }
 			  if (animate) {
-				  $('#status').stop().fadeOut('fast', function () {
+				  $('#status').stop().css('opacity', '1.0').fadeOut('fast', function () {
 					  $('#status').text(status).fadeIn();
 				  });
 			  } else {
@@ -1135,13 +1021,6 @@ Object.size = function (obj) {
 	      }
 	      
 			  document.title = status + MCR.Global.manga.title+' / Ch. '+MCR.Global.request.chapter;
-		  },
-	
-		  /**
-		   * Holds controls functions which change a value.
-		   */
-		  change: {
-			  //
 		  },
 	
 		  /**
@@ -1199,7 +1078,7 @@ Object.size = function (obj) {
 			  },
 			  
 			  /**
-			   * Toggles betweeen 1em spacing between pages or none.
+			   * Toggles betweeen vertical or horizontal reading.
 			   * 
 			   * @param force_to True for horizontal reading
 			   *
@@ -1237,29 +1116,6 @@ Object.size = function (obj) {
 				  }, function () {
 					  a.addClass('white').removeClass('black');
 				  });
-			  },
-		    
-		    /**
-			   * Enable a 5s timeout on Ajax requests.
-			   *
-			   * @param force_to True to enable
-			   *
-			   * @return void
-			   */
-			  timeout: function (/** Boolean */ force_to) {
-				  MCR.Option.toggle('timeout', force_to);
-			  },
-		    		
-			  /**
-			   * Enable cache. Persistence requires HTML5 Local Storage,
-			   * ie. Firefox 3.6+ or Chrome 9+.
-			   *
-			   * @param force_to True to enable
-			   *
-			   * @return void
-			   */
-			  cache: function (/** Boolean */ force_to) {
-				  MCR.Option.toggle('cache', force_to);
 			  },
 		
 			  /**
@@ -1309,7 +1165,6 @@ Object.size = function (obj) {
 			   */
 			  init: function() {	
 				  $('#options-button').click(MCR.Do.panel.toggle);
-				  $('#cache-button').click(function() {MCR.Do.panel.toggle('cache');});
 				  $('#info-button').click(function() {MCR.Do.panel.toggle('info');});
 				  
 				  $('select#chapters').live('change', MCR.Get.selectedChapter);
@@ -1321,24 +1176,17 @@ Object.size = function (obj) {
 				  $('#option-spacing').change(MCR.Do.toggle.spacing);
 				  $('#option-horizontal').change(MCR.Do.toggle.horizontal);
 				  $('#option-black').change(MCR.Do.toggle.black);
-				  $('#option-timeout').change(MCR.Do.toggle.timeout);
 				  $('#option-hotkeys').change(MCR.Do.toggle.hotkeys);
-				  $('#option-cache').change(MCR.Do.toggle.cache);
 				  $('#option-forced800').change(MCR.Do.toggle.forced800);
 				  $('#option-ads').change(MCR.Do.toggle.ads);
 				  
 				  MCR.Do.toggle.spacing( MCR.Option.switched('spacing') );
 				  MCR.Do.toggle.horizontal( MCR.Option.switched('horizontal') );
 				  MCR.Do.toggle.black( MCR.Option.switched('black') );
-				  MCR.Do.toggle.timeout( MCR.Option.switched('timeout') );
 				  MCR.Do.toggle.hotkeys( MCR.Option.switched('hotkeys') );
-				  MCR.Do.toggle.cache( MCR.Option.switched('cache') );
 				  MCR.Do.toggle.forced800( MCR.Option.switched('forced800') );
 				  MCR.Do.toggle.ads( MCR.Option.switched('ads') );
-				  
-				  
-				  $('#cache-clear').click(MCR.Cache.clear);
-			  },
+				},
 		
 			  /**
 			   * Displays the panel specified, or the options panel by default.
@@ -1434,24 +1282,9 @@ Object.size = function (obj) {
 					    
 					    $('article ul').width(MCR.TMP.width);
 					  }
-					  
-					  if ( MCR.Option.switched("cache") ) {
-					    var c = MCR.Cache.get('chapters');
-					    if ( !c[String(MCR.Global.request.manga)] ) {
-					      c[String(MCR.Global.request.manga)] = {};
-					    }
-					    c[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] = MCR.TMP.list;
-					    
-					    MCR.Cache.set('chapters', c);
-					  }
 				  },
 				  
-				  doPage1 = function (doc, cached) {
-				    
-				    if ( cached ) {} else {
-				      $('article ul').html( imgTag(0) );
-				    }
-				    
+				  doPage1 = function (doc) {
 				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
 				    var sss, ss, s = $('script:last', doc).contents().text();
 				    s = s.split("\n");
@@ -1516,25 +1349,6 @@ Object.size = function (obj) {
 			  
 			  MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'...');
 			  
-			  if ( MCR.Option.switched("cache") ) {
-				  // Cache is enabled
-				  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)] ) {
-					  // Cache has this manga
-					  if ( MCR.Cache.get('chapters')[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)] ) {
-						  // Cache has this chapter
-						  MCR.TMP.list = MCR.Cache.get('chapters')[String(MCR.Global.request.manga)][String(MCR.Global.request.chapter)];
-						  
-						  MCR.TMP.page = 1;
-						  MCR.Tool.getFake(makeUrl(), function (doc) {
-						    doPage1(doc, true);
-						  });
-						  
-						  updateDisplay();
-						  return;
-					  }
-				  }
-			  }
-			  
 		    MCR.TMP.list = [];
 			  MCR.TMP.page = 1;
 			  mainLoop();
@@ -1590,7 +1404,6 @@ $(function (){
 	
   MCR.UI.init();
 	MCR.Option.init();
-	MCR.Cache.init();
 	MCR.Do.panel.init();
   
   MCR.Info.show();
