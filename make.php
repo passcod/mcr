@@ -60,18 +60,6 @@ $userjs .= "\n\nfunction GetIt() { return ".$jse."; }";
 
 file_put_contents('bin/mcr.user.js', $userjs);
 
-$lintage = "var MCR_VERSION = ".$version.";\n";
-
-foreach ( $compile['lintage'] as $file ) {
-  if ( $file == 'nl' ) {
-    $lintage .= "\n\n";
-  } else {
-    $lintage .= file_get_contents($file);
-  }
-}
-
-file_put_contents('bin/mcr.lint.js', $lintage);
-
 echo "OK: Compiled v. ".$version." at ".date(DATE_ATOM)."\n";
 
 ?>

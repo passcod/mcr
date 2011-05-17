@@ -1,5 +1,5 @@
 // ==UserScript==
 // @name           Manga ChapterReader
-// @description    Displays full chapters from MangaReader.net in a simpler interface.
-// @author         passcod
-// @license        MIT/X11 + Attribution
+// @description    Displays full chapters from MR.net in a simple interface.
+// @author         Felix "passcod" Saparelli
+// @license        MIT
