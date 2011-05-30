@@ -52,7 +52,9 @@
 		   * @return void
 		   */
 		  show: function () {
-		    var n = $('nav#info');
+		    var n = $('nav#info'),
+						url = MCR.Tool.buildUrl(MCR.Global.request.manga, MCR.Global.request.chapter);
+				
 		    $('h1', n).html(MCR.Global.manga.title);
 		    $('h2', n).html(MCR.Global.manga.chapter['name']);
 		    $('#description', n).html(MCR.Global.manga.description);
@@ -62,8 +64,12 @@
 		    $('#artist', n).text(MCR.Global.manga.artist);
 		    $('#cover', n).attr('src', MCR.Global.manga.cover);
 		    
-		    $('#permalink').attr('href', MCR.Tool.buildUrl(MCR.Global.request.manga, MCR.Global.request.chapter));
+		    $('#permalink').attr('href', url);
 		    $('#version').text(MCR_VERSION);
+				
+				if (MCR.Tool.canHazStories()) {
+					history.pushState(null, null, url);
+				}
 		  }
 	  },
 
@@ -494,6 +500,10 @@
 				  return false;
 			  }
 		  },
+			
+			canHazStories: function() {
+				return !!(window.history && history.pushState);
+			},
 
 		  /**
 		   * Capitalizes each word (space-separated) in the given string.
