@@ -1,4 +1,4 @@
-var MCR_VERSION = '11.150';
+var MCR_VERSION = '11.151';
 /*!
  * jQuery JavaScript Library v1.4.4
  * http://jquery.com/
@@ -240,7 +240,80 @@ Object.size = function (obj) {
  */
 
 
-(function (window) {
+/** chapter.js
+ * Retrieves the URLs of the pages of a chapter on MR.net asyncronously.
+ * Triggers the `gotchapter` event on window when the chapter is done loading.
+ * Inputs: Name of manga, Chapter number
+ * Output: Array of urls.
+ */
+
+(function(window) {
+	"use strict";
+	
+	var Chapter = function(manga, chapter) {
+		var url   = "http://www.mangareader.net/"+manga+"/"+chapter+"/";
+		var pages = this.pages = [];
+		
+		// Event name
+		var ec = this.ec = "gotchapter";
+		var ep = this.ep = "gotpage";
+		
+		var mangaid;
+		var loaded = false;
+		
+		this.mangaid = function() { return mangaid; };
+		
+		// Initiates the loading of the chapter
+		var get = this.get = function() {
+			if (!loaded) {
+				request(url+(pages.length+1), function (doc) {
+					var img = $('#img', doc).attr('src');
+					
+					if (typeof img !== 'undefined') {
+						if (typeof mangaid === 'undefined') {
+							var scr = $('script:last', doc).contents().text().split("\n"),
+									mid = scr.splice(0, scr.indexOf("function omvKeyPressed(e) {"))[1];
+							mangaid = mid.match(/([0-9]+);/i)[1]*1;
+						}
+						
+						$(window).trigger(ep, [pages.length+1, mangaid]);
+						pages.push(img);
+						get();
+					} else {
+						$(window).trigger(ec, [pages, mangaid]);
+						loaded = true;
+					}
+				});
+			} else {
+				$(window).trigger(ec, [pages, mangaid]);
+			}
+		};
+		
+		var request = function (url, callback) {
+			$.ajax({
+				type: "GET",
+				url: url,
+				success: function(data) {
+					callback(
+						(new DOMParser())
+							.parseFromString(data, "text/xml")
+					);
+				},
+				error: function() {
+					callback(
+						(new DOMParser())
+							.parseFromString("<html><head></head><body></body></html>", "text/xml")
+					);
+				}
+			});
+		};
+	};
+	
+	Chapter.ep = (new Chapter()).ep;
+	Chapter.ec = (new Chapter()).ec;
+	
+	window.Chapter = Chapter;
+})(window);(function (window) {
   "use strict";
     
   /** @namespace */
@@ -410,7 +483,7 @@ Object.size = function (obj) {
             " 		- Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>"+
             "     - Fork me on <a href='https://github.com/passcod/Manga-ChapterReader/'>Github</a>"+
             " 		- License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a>"+
-            "		  - Thanks for using!"+
+            "		  - Thanks <a href='http://localhost/mcr.user.js?v="+Math.floor(Math.random()*10000)+".user.js'>for</a> using!"+
             "     (v. <span id='version'></span>)"+
             "   </nav>"+
             "	  <div id='ads'></div>"+
@@ -1246,128 +1319,48 @@ Object.size = function (obj) {
 	   */
 	  Get: {
 		  chapter: function () {
-			  var url, i,
-				  makeUrl = function () {
-					  return MCR.Tool.buildUrl(
-						  MCR.Global.request.manga,
-						  MCR.Global.request.chapter,
-						  MCR.TMP.page);
-				  },
-			
-				  updateSelect = function () {
-					  var c, html = "";
-					  for ( var i in MCR.Global.manga.chapters ) {
-					    c = MCR.Global.manga.chapter.index == i ? ' selected="selected" ' : ' ';
-					    html += "<option value='"+MCR.Global.manga.chapters[i]['chapter']+"'"+c+">"+MCR.Global.manga.chapters[i]['chapter']+"\n";
-					  }
-					  $('#chapters').html(html);
-				  },
-			    
-			    imgTag = function (page) {
-			      var t = MCR.Global.manga.title + ' / ' +
-				      MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + ' / ' +
-				      'Page ' + page,
-				      
-				        s = MCR.Option.switched('spacing') ? 'margin-bottom: 1em;' : 'margin-bottom: 0px;';
-				    return "<li><img src='"+MCR.TMP.list[page]+"' alt='"+t+"' title='"+t+"' style='"+s+"' /></li>\n";
-			    },
-			    
-				  updateDisplay = function () {
-					  var i, h = "", t;
-					  for ( i in MCR.TMP.list ) {
-					    h += imgTag(i);
-					  }
-					  $('article ul').html(h);
-					  window.scroll(0,0);
-					  MCR.Do.displayStatus('');
-					  
-					  if ( MCR.Option.switched("horizontal") ) {
-					    MCR.TMP.width = 0;
-					    $('article img').each(function() {
-					      var w = $(this).width();
-					      if ( w < 800 ) { w = 800; }
-					      MCR.TMP.width += w + 20;
-					    });
-					    
-					    $('article ul').width(MCR.TMP.width);
-					  }
-				  },
-				  
-				  doPage1 = function (doc) {
-				    MCR.Global.manga.chapter['number'] = MCR.Global.request.chapter;
-				    var sss, ss, s = $('script:last', doc).contents().text();
-				    s = s.split("\n");
-				    ss = s.indexOf("function omvKeyPressed(e) {");
-				    sss = s.splice(0, ss).join("\n");
-				    
-				    var s = $('script:last', doc).contents().text(),
-				        ss = s.split("\n"),
-				        sss = ss.indexOf("function omvKeyPressed(e) {"),
-				        ssss = ss.splice(0, sss).join("\n");
-				    eval(ssss);
-				    
-				    MCR.Global.manga.id = document['mangaid'];
-				    
-				    $.getJSON('/actions/selector/?id='+MCR.Global.manga.id+'&which=0', function(j) {
-				      MCR.Global.manga.chapters = j;
-				      
-				      var i, k;
-				      for ( i in j ) {
-				        k = j[i];
-				        if ( String(k.chapter) == MCR.Global.request.chapter ) {
-				          MCR.Global.manga.chapter['name'] = j[i]['chapter_name'];
-				          MCR.Global.manga.chapter.index = i;
-				        }
-				      }
-				      
-				      updateSelect();
-				      
-				      MCR.Info.show();
-				    });
-				    
-				    MCR.Tool.getFake(MCR.Tool.buildUrl(MCR.Global.request.manga), function (doc) {
-				      MCR.Global.manga.description = $('#readmangasum p', doc).text();
-				      MCR.Global.manga.cover = $('#mangaimg img', doc).attr('src');
-				      MCR.Global.manga.pubdate = $('#mangaproperties tr:eq(2) td:last', doc).text();
-				      MCR.Global.manga.status = $('#mangaproperties tr:eq(3) td:last', doc).text();
-				      MCR.Global.manga.author = $('#mangaproperties tr:eq(4) td:last', doc).text();
-				      MCR.Global.manga.artist = $('#mangaproperties tr:eq(5) td:last', doc).text();
-				      
-				      MCR.Info.show();
-				    });
-				  },
-			
-				  mainLoop = function () {
-				    MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'...'+
-				      '('+MCR.TMP.page+')', false);
-					  MCR.Tool.getFake(makeUrl(), function (doc) {
-					    var disp = false,
-					        img = $('#img', doc);
-				      if ( typeof img.attr('src') !== 'undefined' /*&& MCR.TMP.page <= 2 /* DEBUG */ ) {
-			          MCR.TMP.list.push(img.attr('src'));
-			          if ( MCR.TMP.page == 1 ) {
-			            doPage1(doc);
-			          }
-			          MCR.TMP.page++;
-			          mainLoop();
-				      } else {
-					      updateDisplay();
-					    }
-					  });
-				  };
-			  
 			  MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'...');
-			  
-		    MCR.TMP.list = [];
-			  MCR.TMP.page = 1;
-			  mainLoop();
+				
+				(new Chapter(MCR.Global.request.manga, MCR.Global.request.chapter)).get();
 		  },
+			
+			updateDisplay: function(e, pages) {
+				console.log('Hey');
+				var i, h = "", t;
+				for ( i in pages ) {
+					var tt = MCR.Global.manga.title + ' / ' + MCR.Global.request.chapter + ': ' + MCR.Global.manga.chapter['name'] + ' / ' + 'Page ' + page;
+					var ss = MCR.Option.switched('spacing') ? 'margin-bottom: 1em;' : 'margin-bottom: 0px;';
+					
+					h += "<li><img src='"+pages[page]+"' alt='"+tt+"' title='"+tt+"' style='"+ss+"' /></li>\n";
+				}
+				$('article ul').html(h);
+				window.scroll(0,0);
+				MCR.Do.displayStatus('');
+				
+				if ( MCR.Option.switched("horizontal") ) {
+					MCR.TMP.width = 0;
+					$('article img').each(function() {
+						var w = $(this).width();
+						if ( w < 800 ) { w = 800; }
+						MCR.TMP.width += w + 20;
+					});
+					
+					$('article ul').width(MCR.TMP.width);
+				}
+				
+				var c, html = "";
+				for ( var i in MCR.Global.manga.chapters ) {
+					c = MCR.Global.manga.chapter.index == i ? ' selected="selected" ' : ' ';
+					html += "<option value='"+MCR.Global.manga.chapters[i]['chapter']+"'"+c+">"+MCR.Global.manga.chapters[i]['chapter']+"\n";
+				}
+				$('#chapters').html(html);
+			},
 	        
 	   // Chapter Switching
 
       selectedChapter: function () {
 	      MCR.Global.request.chapter = $('#chapters').val();
-	
+				
 	      MCR.Get.chapter();
       },
 
@@ -1391,7 +1384,45 @@ Object.size = function (obj) {
 	      } else {
 		      MCR.Do.displayStatus('This is the last Chapter');
 	      }
-      }
+      },
+			
+			init: function() {
+				var $W = $(window);
+				
+				$W.bind(Chapter.ep, function() {
+					MCR.Do.displayStatus('Loading Ch. '+MCR.Global.request.chapter+'... ('+page+')', false);
+
+					/*if (page == 1) {
+						$.getJSON('/actions/selector/?id='+mangaid+'&which=0', function(j) {
+							MCR.Global.manga.chapters = j;
+							
+							var i, k;
+							for ( i in j ) {
+								k = j[i];
+								if ( String(k.chapter) == MCR.Global.request.chapter ) {
+									MCR.Global.manga.chapter['name'] = j[i]['chapter_name'];
+									MCR.Global.manga.chapter.index = i;
+								}
+							}
+							
+							MCR.Info.show();
+						});
+						
+						MCR.Tool.getFake(MCR.Tool.buildUrl(MCR.Global.request.manga), function (doc) {
+							MCR.Global.manga.description = $('#readmangasum p', doc).text();
+							MCR.Global.manga.cover = $('#mangaimg img', doc).attr('src');
+							MCR.Global.manga.pubdate = $('#mangaproperties tr:eq(2) td:last', doc).text();
+							MCR.Global.manga.status = $('#mangaproperties tr:eq(3) td:last', doc).text();
+							MCR.Global.manga.author = $('#mangaproperties tr:eq(4) td:last', doc).text();
+							MCR.Global.manga.artist = $('#mangaproperties tr:eq(5) td:last', doc).text();
+							
+							MCR.Info.show();
+						});
+					}*/
+				});
+				
+				$W.bind(Chapter.ec, MCR.Get.updateDisplay);
+			}
 	  }
   };
 
@@ -1414,8 +1445,16 @@ $(function (){
   MCR.UI.init();
 	MCR.Option.init();
 	MCR.Do.panel.init();
+	MCR.Get.init();
   
   MCR.Info.show();
-  
+	
 	MCR.Get.chapter();
+  
+	console.log('Hey', Chapter.ep);
+	
+	$(window).bind("popstate", function() {
+		MCR.Global.request = MCR.Tool.parseUrl(window.location);
+		MCR.Get.chapter();
+	});
 });

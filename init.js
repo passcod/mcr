@@ -13,8 +13,16 @@ $(function (){
   MCR.UI.init();
 	MCR.Option.init();
 	MCR.Do.panel.init();
+	MCR.Get.init();
   
   MCR.Info.show();
-  
+	
 	MCR.Get.chapter();
+  
+	console.log('Hey', Chapter.ep);
+	
+	$(window).bind("popstate", function() {
+		MCR.Global.request = MCR.Tool.parseUrl(window.location);
+		MCR.Get.chapter();
+	});
 });
