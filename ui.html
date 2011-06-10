@@ -1,0 +1,53 @@
+<div id='container'>
+  <header>
+    <nav id='main'>
+      <span class='has-bg'><select><option>---</option></select></span>
+      <span id='links'>
+        <a id='button-home'><img alt='Home' title='Home' /></a>
+        <a id='button-info'><img alt='Info' title='Info' /></a>
+        <a id='button-options'><img alt='Options' title='Options' /></a>
+        <a id='button-permalink'><img alt='Permalink' title='Permalink' /></a>
+        <a id='button-hotkeys'><img alt='Hotkeys' title='Hotkeys' /></a>
+        <a id='button-theme'><img alt='Theme' title='Theme' /></a>
+        <a id='button-favs'><img alt='Favs' title='Favs' /></a>
+        <a id='button-mark'><img alt='Bookmarks' title='Bookmarks' /></a>
+      </span>
+      <span style='float: right;'>
+        <span id='status'>Ready</span>
+        <a id='button-previous'><img alt="Previous" title="Previous" /></a>
+        <a id='button-reload'><img alt="Reload" title="Reload" /></a>
+        <a id='button-next'><img alt="Next" title="Next" /></a>
+      </span>
+    </nav>
+    <nav id='options' class='has-rule'><h1>Options</h1></nav>
+    <nav id='info'>
+      <img id='cover' />
+      <h1>Manga</h1>
+      <h2>Chapter</h2>
+      <p>Released since <date pubdate='pubdate'></date> and currently <i id='stat'></i></p>
+      <p id='arthor'>Story / Art by</p>
+      <p id='description'>Description</p>
+    </nav>
+    <nav id='hotkeys' class='has-rule'>
+      <h1>Hotkeys</h1>
+      <h2>Key Code: <input id='keytest' /><span id='keycode'></span></h2>
+    </nav>
+    <nav id='theme'>
+      <h1>Theme</h1>
+    </nav>
+  </header>
+  <article class='spaced'>
+    <ul><li><img class='loading' />Loading...</li></ul>
+  </article>
+  <footer>
+    <nav>
+      Userscript by <a href='http://passcod.net'>passcod</a>
+      - Uses <a href='http://jquery.com'>jQuery</a>
+      - Works best in <a href='http://www.mozilla.com/firefox/'>Firefox 4</a>
+      - Fork me on <a href='https://github.com/passcod/Manga-ChapterReader/'>Github</a>
+      - License: <a href='http://www.opensource.org/licenses/mit-license.php'>MIT</a>
+      - Thanks for using!
+      (v. <span id='version'></span>)
+    </nav>
+  </footer>
+</div>

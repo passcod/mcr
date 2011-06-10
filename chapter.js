@@ -12,10 +12,6 @@
 		var url   = "http://www.mangareader.net/"+manga+"/"+chapter+"/";
 		var pages = this.pages = [];
 		
-		// Event name
-		var ec = this.ec = "gotchapter";
-		var ep = this.ep = "gotpage";
-		
 		var mangaid;
 		var loaded = false;
 		
@@ -34,16 +30,16 @@
 							mangaid = mid.match(/([0-9]+);/i)[1]*1;
 						}
 						
-						$(window).trigger(ep, [pages.length+1, mangaid]);
+						$(window).trigger("gotpage", [pages.length+1, mangaid]);
 						pages.push(img);
 						get();
 					} else {
-						$(window).trigger(ec, [pages, mangaid]);
+						$(window).trigger("gotchapter", [pages, mangaid]);
 						loaded = true;
 					}
 				});
 			} else {
-				$(window).trigger(ec, [pages, mangaid]);
+				$(window).trigger("gotchapter", [pages, mangaid]);
 			}
 		};
 		
@@ -67,8 +63,5 @@
 		};
 	};
 	
-	Chapter.ep = (new Chapter()).ep;
-	Chapter.ec = (new Chapter()).ec;
-	
-	window.Chapter = Chapter;
+	window.Ç.Chapter = Chapter;
 })(window);
