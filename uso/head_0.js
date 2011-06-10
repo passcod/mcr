@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           Manga ChapterReader
+// @name           MCR 3: 死の色
 // @description    Displays full chapters from MR.net in a simple interface.
-// @author         Felix "passcod" Saparelli
+// @author         Felix Saparelli
 // @license        MIT

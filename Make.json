@@ -1,15 +1,15 @@
 {
   "script": [
     "lib/jquery.js",
-    "nl",
+    "lib/modernizer.js",
     "lib/dom_parser.js",
     "lib/object_size.js",
     "nl",
     "LICENSE",
     "nl",
+    "namespace.js",
 		"chapter.js",
-    "main.js",
-    "nl",
+    "ui.js",
     "init.js"
   ],
   "userjs": [

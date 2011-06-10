@@ -3,6 +3,7 @@
 date_default_timezone_set('Pacific/Auckland');
 
 include "lib/jsmin.php";
+include "lib/htmlmin.php";
 
 $version = chop(file_get_contents('VERSION'));
 $compile = json_decode(file_get_contents('Make.json'), true);
@@ -28,11 +29,32 @@ Running with no arguments uses the version in the VERSION file.
 <?php exit;
 }
 
-$js = "var MCR_VERSION = '".$version."';\n";
+$data = array(
+  'html' => Minify_HTML::minify(file_get_contents('ui.html')),
+  'css'  => JSMin::minify(file_get_contents('ui.css')),
+  
+  'home'      => base64_encode(file_get_contents('img/home.png')),
+  'info'      => base64_encode(file_get_contents('img/info.png')),
+  'options'   => base64_encode(file_get_contents('img/options.png')),
+  'permalink' => base64_encode(file_get_contents('img/permalink.png')),
+  'hotkeys'   => base64_encode(file_get_contents('img/hotkeys.png')),
+  'theme'     => base64_encode(file_get_contents('img/theme.png')),
+  'favs'      => base64_encode(file_get_contents('img/favs.png')),
+  'mark'      => base64_encode(file_get_contents('img/mark.png')),
+  'previous'  => base64_encode(file_get_contents('img/previous.png')),
+  'reload'    => base64_encode(file_get_contents('img/reload.png')),
+  'next'      => base64_encode(file_get_contents('img/next.png')),
+  'loading'   => base64_encode(file_get_contents('img/loading.png')),
+  
+  'version' => "'$version'"
+);
 
+$js = "";
 foreach ( $compile['script'] as $file ) {
   if ( $file == 'nl' ) {
     $js .= "\n\n";
+  } elseif ($file == 'namespace.js') {
+    $js .= str_replace('$data', json_encode($data), file_get_contents('namespace.js'));
   } else {
     $js .= file_get_contents($file);
   }
