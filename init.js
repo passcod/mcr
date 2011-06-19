@@ -2,15 +2,6 @@ $(function (){
   // Disable the annoying 'skip to next page' keyboard shortcut
   function omvKeyPressed() {}
   document.onkeydown = function() {};
-  /*
-	MCR.Global.request = MCR.Tool.parseUrl(window.location);
-	MCR.Global.manga.title = MCR.Tool.capitalize(MCR.Global.request.manga.replace(/-/ig, ' '));
-	MCR.Global.manga.chapter = {
-		"number": MCR.Global.request.chapter,
-		"name": ""
-	};
-	*/
-  var ui = new Ç.Ui();
   
   var options = {
     "spacing": {
@@ -33,36 +24,110 @@ $(function (){
       "default": false,
       "able": true
     },
+    "history": {
+      "description": "Update the URL when changing chapter." + (Modernizr.history ? '' : ' Requires a modern browser.'),
+      "default": Modernizr.history,
+      "able": Modernizr.history
+    },
     "preload": {
       "description": "Preload the next chapter as you are reading this one." + (Modernizr.postmessage ? '' : ' Requires a modern browser.'),
       "default": false,
       "able": Modernizr.postmessage
     }
   };
-  for (var n in options) {
-    ui.addOption(n, options[n]['description'], options[n]['default']);
-  }
-	
-  /*
-	$(window).bind("popstate", function() {
-		MCR.Global.request = MCR.Tool.parseUrl(window.location);
-		MCR.Get.chapter();
-	});
   
-  $(window).bind("keyprevious hitprevious", MCR.Get.previousChapter);
-  $(window).bind("keynext hitnext", MCR.Get.nextChapter);*/
-  $(window).bind("keyreload hitreload", function() {
-    window.location = $('#permalink').attr('href');
-  });
-  $(window).bind("keyhome hithome", function() {
-    window.location = "http://www.mangareader.net";
-  });
+  /**
+   * Parses the current URL to extract information:
+   * manga name, chapter number, page number
+   *
+   * @return {Array} Resulting info.
+   */
+  var parseURL = function () {
+    var U = {},
+      url_str = window.location.href,
+      Ro = /mangareader\.net\/[0-9]+\-[0-9]+\-([0-9]+)\/([a-z0-9\-]+)\/chapter-([0-9]+)\.html?/i.exec(url_str), // Old
+      Rn = /mangareader\.net\/([a-z0-9\-]+)(\/[0-9]+)?(\/[0-9]+)?/i.exec(url_str), // New
+      ss = /[\/]/; // Slash-stripper
+
+    if ( Ro !== null ) {
+      U.page    = Ro[1] ? Number(Ro[1].replace(ss, '')) : null;
+      U.manga   = Ro[2] ?        Ro[2].replace(ss, '')  : null;
+      U.chapter = Ro[3] ? Number(Ro[3].replace(ss, '')) : null;
+    } else if ( Rn !== null ) {
+      U.manga   = Rn[1] ?        Rn[1].replace(ss, '')  : null;
+      U.chapter = Rn[2] ? Number(Rn[2].replace(ss, '')) : null;
+      U.page    = Rn[3] ? Number(Rn[3].replace(ss, '')) : null;
+    } else {
+      return null;
+    }
+
+    return U;
+  };
+  
+  
+  var ui    = new Ç.Ui(),
+      info  = parseURL(),
+      manga = -1,
+      
+      c = new Ç.Chapter(info.manga, info.chapter);
+  
+  c.get();
+  
+  $(window).bind("gotchapter", function(e, pages, chap) {
+      if (manga == -1) {
+        manga = new Ç.Manga(info.manga, c.mangaid());
+        manga.setChapter(info.chapter);
+      }
+      
+      ui.setStatus('Got Chapter '+chap.num());
+      ui.updateURL(manga.info().name, manga.getChapter());
+      ui.display(pages);
+    })
+    
+    .bind("gotinfo", function(e, page) {
+      manga.addChapter(c);
+    })
+    
+    .bind("gotpage", function(e, page) {
+      ui.setStatus('Got Page '+page);
+    })
+    
+    
+    .bind("firstchapter", function() {
+      ui.setStatus('This is the first chapter');
+    })
+    
+    .bind("lastchapter", function() {
+      ui.setStatus('This is the last chapter');
+    })
+    
+    .bind("keyreload hitreload", function() {
+      window.location = $('#button-permalink').attr('href');
+    })
+    .bind("keyhome hithome", function() {
+      window.location = "http://www.mangareader.net";
+    })
+    
+    .bind("keyprevious hitprevious", function() {manga.previousChapter();})
+    .bind("keynext hitnext", function() {manga.nextChapter();})
+    
+    .bind("popstate", function() {
+      info = parseURL();
+      if (manga !== -1) {
+        manga.setChapter(info.chapter);
+        manga.loadChapter();
+      }
+    });
   
   ui.changeColours(
     [255, 255, 255, 1],
     [0, 0, 0, 1],
     [199, 228, 64, 0.8]
   );
+  
+  for (var n in options) {
+    ui.addOption(n, options[n]['description'], options[n]['default']);
+  }
   
   ui.setStatus('Ready');
 });

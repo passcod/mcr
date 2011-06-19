@@ -9,6 +9,7 @@
     "nl",
     "namespace.js",
 		"chapter.js",
+    "manga.js",
     "ui.js",
     "init.js"
   ],
