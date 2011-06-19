@@ -18,21 +18,18 @@ header nav {
   border: 5px solid;
   padding: 5px;
   display: none;
-  opacity: 0.2;
+  z-index: 100;
   position: fixed;
   font-size: 0.8em;
   text-align: justify;
 }
 
-header nav:hover {
-  opacity: 0.85;
-}
-
 nav#main {
-  top: 0px;
+  top: -36px;
   height: 24px;
-  display: block;
   line-height: 24px;
+  display: block;
+  
 }
 
 nav#main img {
@@ -62,6 +59,10 @@ img#cover {
 
 article {
   text-align: center;
+}
+
+article img {
+  display: inline-block;
 }
 
 .forced800 img {
@@ -117,10 +118,18 @@ article ul {
   float: left;
 }
 
-.spaced img {
-  margin-bottom: 1em;
+.spaced li {
+  padding: 0.5em;
 }
 
-.horizontal.spaced li {
-  padding: 0.5em;
+div#mask {
+  background: black;
+  opacity: 0.8;
+  display: none;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  position: fixed;
+  top: 0px;
+  left: 0px;
 }

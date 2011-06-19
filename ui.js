@@ -4,35 +4,8 @@
 
   var Ui = function() {
     var manga = chapterno = chaptername = artist = author = release = rstatus = "";
-    
-    $('head').append('<style>'+Ç.data.css+'</style>');
-    $('body > *').not('script, #container').remove();
-    $('body').append(Ç.data.html).add('header nav').addClass('has-bg');
-    $('header nav').addClass('has-border');
-        
     var navs = ['info', 'options', 'hotkeys', 'theme', 'favs', 'mark'];
-    for (var k in navs) {
-      (function(name, that) {
-        $(window).bind("key"+name+" hit"+name, function() {
-          if ($('nav#'+name).is(':hidden')) {
-            that.showNav(name);
-          } else {
-            that.hideNav(name);
-          }
-        });
-      })(navs[k], this); // Or `self`?
-    }
-    
     var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys', 'theme', 'favs', 'mark'];
-    for (var b in buttons) {
-      (function(name) {
-        $('#button-'+name).click(function() {
-          $(window).trigger("hit"+name);
-        });
-      })(buttons[b]);
-      $('#button-'+buttons[b]+' img').attr('src', 'data:image/png;base64,'+Ç.data[buttons[b]]);
-    }
-    
     var hotkeys = {
       'next': 68, 'previous': 65, 'home': 87, 'reload': 83,
       'info': 73, 'options': 79, 'hotkeys': 72, 'theme': 84, 'favs': 70, 'mark': 66,
@@ -40,14 +13,8 @@
       'favadd': -1, 'favdel': -1, 'favtog': -1,
       'markadd': -1, 'markdel': -1, 'marktog': -1
     };
-    $(window).keydown(function(e) {
-      for (var h in hotkeys) {
-        if (hotkeys[h] == e.which) {
-          $(window).trigger(h);
-        }
-      }
-    });
-    
+    var self = this;
+    var k;
     
     /**
      * Change the status message.
@@ -73,7 +40,7 @@
      * @param  _artist       The artist.
      * @param  _author       The author.
      * @param  _release      The release date.
-     * @param  _status       The release status.
+     * @param  _rstatus      The release status.
      * @return void
      */
     this.setInfo = function(/** String  */ _manga,
@@ -82,14 +49,14 @@
                             /** String  */ _artist,
                             /** String  */ _author,
                             /** Integer */ _release,
-                            /** String  */ _status) {
+                            /** String  */ _rstatus) {
       manga       = _manga       || manga;
       chapterno   = _chapterno   || chapterno;
       chaptername = _chaptername || chaptername;
       artist      = _artist      || artist;
       author      = _author      || author;
       release     = _release     || release;
-      rstatus     = _status      || rstatus;
+      rstatus     = _rstatus     || rstatus;
       
       var $info = $('nav#info');
       $('h1', $info).text(manga);
@@ -144,6 +111,31 @@
     };
     
     /**
+     * Shows the main nav.
+     *
+     * @return void
+     */
+    this.showMain = function() {
+      $('nav#main')
+        .clearQueue()
+        .animate({top:'0px'}, 'fast');
+    };
+    
+    /**
+     * Hides the main nav, but only if there are no other navs shown.
+     *
+     * @return void
+     */
+    this.hideMain = function() {
+      if ($('nav#main').data('let') === false) {
+        $('div#mask').fadeOut();
+        $('nav#main')
+          .clearQueue()
+          .animate({top:'-36px'}, 'fast');
+      }
+    };
+    
+    /**
      * Hides all navs (except #main), then shows the specified one.     
      * 
      * @param  name  The id of the nav.
@@ -155,9 +147,9 @@
           this.hideNav(navs[n]);
         }
       }
-      $('nav#'+name).show('fast', function() {
-        $(this).add('nav#main').css('opacity', '0.85');
-      });
+      $('div#mask').fadeIn();
+      $('nav#main').data('let', true);
+      $('nav#'+name).show('fast');
       $(window).trigger("navshown", [name]);
     };
     
@@ -169,9 +161,8 @@
      */
     this.hideNav = function(/** String */ name) {
       if (name != 'main') {
-        $('nav#'+name).hide('fast', function() {
-          $(this).add('nav#main').css('opacity', '');
-        });
+        $('nav#main').data('let', false);
+        $('nav#'+name).hide('fast');
         $(window).trigger("navhidden", [name]);
       }
     };
@@ -223,14 +214,98 @@
       var ruls = {columnRule: colorStyle(border)};
       ruls[Modernizr.prefixed('columnRuleColor')] = colorStyle(border);
       
-      console.log(colorStyle(border));
-      
       $('.has-bg').css('background-color', colorStyle(background));
       $('.has-border').css('border-color', colorStyle(border));
       $('.has-rule').css(ruls);
       $('body').css('color', colorStyle(text));
     };
-  };
+
+    /**
+     * Displays a chapter.
+     * 
+     * @param  pages  An array of image urls.
+     * @return void
+     */
+    this.display = function(/** Array */ pages) {
+      var p, $p = $('article ul');
+      $('li', $p).remove();
+      for (var p in pages) {
+        $p.append('<li><img src="'+pages[p]+'" /></li>');
+      }
+    };
+    
+    this.updateURL = function(mng, chp) {
+      if (Modernizr.history) {
+        history.pushState({
+            manga: mng,
+            chapter: chp+1
+          },
+          $('title').text(),
+          "http://www.mangareader.net/"+mng+"/"+(chp+1)
+        );
+      }
+      $('#button-permalink').attr('href', "http://www.mangareader.net/"+mng+"/"+(chp+1));
+    };
+    
+    
+    $('head').append('<style>'+Ç.data.css+'</style>');
+    $('body > *').not('script, #container').remove();
+    $('body').append(Ç.data.html).add('header nav').addClass('has-bg');
+    $('header nav').addClass('has-border');
+    
+    $('nav#main').hover(function() {
+      self.showMain();
+      $(this).data('hover', true);
+    }, function() {
+      self.hideMain();
+      $(this).data('hover', false);
+    }).data('hover', false);
+    
+    for (k in navs) {
+      (function(name, that) {
+        $(window).bind("key"+name+" hit"+name, function() {
+          if ($('nav#'+name).is(':hidden')) {
+            that.showNav(name);
+            that.showMain();
+          } else {
+            that.hideNav(name);
+            if ($('nav#main').data('hover') === false) {
+              that.hideMain();
+            }
+          }
+        });
+      })(navs[k], this);
+    }
+    
+    for (k in buttons) {
+      (function(name) {
+        $('#button-'+name).click(function() {
+          $(window).trigger("hit"+name);
+        });
+      })(buttons[k]);
+      $('#button-'+buttons[k]+' img').attr('src', 'data:image/png;base64,'+Ç.data[buttons[k]]);
+    }
+    
+    $(window).keydown(function(e) {
+      for (k in hotkeys) {
+        if (hotkeys[k] == e.which) {
+          $(window).trigger('key'+k);
+        }
+      }
+    });
+    
+    $('div#mask').click(function(e) {
+      if ($('nav#main').data('let') === true) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        for (k in navs) {
+          self.hideNav(navs[k]);
+        }
+        self.hideMain();
+      }
+    });
+  };  
   
   window.Ç.Ui = Ui;
 
