@@ -24,6 +24,11 @@ $(function (){
       "default": false,
       "able": true
     },
+    "fullwidth": {
+      "description": "Allows the nav/panels to extends to the full width of the screen.",
+      "default": true,
+      "able": true
+    },
     "history": {
       "description": "Update the URL when changing chapter." + (Modernizr.history ? '' : ' Requires a modern browser.'),
       "default": Modernizr.history,
@@ -69,6 +74,8 @@ $(function (){
       info  = parseURL(),
       manga = -1,
       
+      gotinfo = false,
+      
       c = new Ç.Chapter(info.manga, info.chapter);
   
   c.get();
@@ -79,17 +86,40 @@ $(function (){
         manga.setChapter(info.chapter);
       }
       
-      ui.setStatus('Got Chapter '+chap.num());
-      ui.updateURL(manga.info().name, manga.getChapter());
       ui.display(pages);
+      
+      if (gotinfo) {
+        ui.setInfo(
+          false,
+          manga.getChapter(),
+          manga.chapters()[manga.getChapter()].name
+        );
+        
+        ui.setStatus('');
+        ui.updateURL();
+      }
     })
     
     .bind("gotinfo", function(e, page) {
       manga.addChapter(c);
+      gotinfo = true;
+      
+      ui.setInfo(
+        manga.info().name,
+        manga.getChapter(),
+        manga.chapters()[manga.getChapter()].name,
+        manga.info().artist,
+        manga.info().author,
+        manga.info().pubdate,
+        manga.info().status
+      );
+      
+      ui.setStatus('');
+      ui.updateURL();
     })
     
-    .bind("gotpage", function(e, page) {
-      ui.setStatus('Got Page '+page);
+    .bind("gotpage", function(e, page, chap) {
+      ui.setStatus('Loading Ch. '+chap.num()+' ('+page+')');
     })
     
     
