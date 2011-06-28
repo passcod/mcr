@@ -17,13 +17,14 @@
     if (!gotinfo) {    
       $.getJSON('/actions/selector/?which=0&id='+mangaid, function(j) {
         
-        var i, chap;
+        var i, chap, name;
         for (i in j) {
           chap = j[i];
+          name = chap['name'] === undefined ? "" : chap['name'];
           
           numbers.push(chap['chapter']);
           chapters[ chap['chapter'] ] = {
-            'name': chap['name'],
+            'name': name,
             'data': new Ç.Chapter(manga, chap['chapter'])
           };
         }
@@ -72,11 +73,13 @@
      * @return {Chapter}
      */
     this.nextChapter = function() {
+      console.log('Before: '+chapter);
       if (chapter < numbers.length) {
         chapter++;
       } else {
         $(window).trigger('lastchapter');
       }
+      console.log('After: '+chapter);
       self.loadChapter();
     };
     
@@ -116,7 +119,7 @@
     /**
      * Triggers the loading of the desired chapter.
      *
-     * @param  n  The chapter number (optional).
+     * @param  n  The chapter number (optional) (will default to internal pointer).
      * @return void
      */
     this.loadChapter = function(n) {

@@ -3,7 +3,7 @@
 (function(window) {
 
   var Ui = function() {
-    var manga = chapterno = chaptername = artist = author = release = rstatus = "";
+    var manga = title = chapterno = chaptername = artist = author = release = rstatus = "";
     var navs = ['info', 'options', 'hotkeys', 'theme', 'favs', 'mark'];
     var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys', 'theme', 'favs', 'mark'];
     var hotkeys = {
@@ -24,10 +24,23 @@
      */
     this.setStatus = function(/** String */ message) {
       message = message || '';
-      var title = message + (message == '' ? '' : ' / ');
+      var msg = message + (message == '' ? '' : ' / ');
       $('#status').text(message);
       
-      $('title').text( title + chapterno + ": " + chaptername + " / " + manga );
+      $('title').text( msg + chapterno + chaptername + " / " + title );
+    };
+    
+    this.updateURL = function() {
+      if (Modernizr.history) {
+        history.pushState({
+            manga: manga,
+            chapter: chapterno
+          },
+          $('title').text(),
+          "http://www.mangareader.net/"+manga+"/"+chapterno
+        );
+      }
+      $('#button-permalink').attr('href', "http://www.mangareader.net/"+manga+"/"+chapterno);
     };
     
     /**
@@ -50,26 +63,45 @@
                             /** String  */ _author,
                             /** Integer */ _release,
                             /** String  */ _rstatus) {
-      manga       = _manga       || manga;
-      chapterno   = _chapterno   || chapterno;
-      chaptername = _chaptername || chaptername;
-      artist      = _artist      || artist;
-      author      = _author      || author;
-      release     = _release     || release;
-      rstatus     = _rstatus     || rstatus;
+      function def(val, def) {
+        if (val === "" || val === false) {
+          return def;
+        }
+        return val;
+      }
+      
+      manga       = def(_manga,       manga);
+      chapterno   = def(_chapterno+1, chapterno);
+      chaptername = def(_chaptername, chaptername);
+      artist      = def(_artist,      artist);
+      author      = def(_author,      author);
+      release     = def(_release,     release);
+      rstatus     = def(_rstatus,     rstatus);
+      
+      title = manga.replace(/-/g, ' ').replace(/^([a-z])|\s+([a-z])/g, function ($1) {
+        return $1.toUpperCase();
+      });
+      
+      if (chaptername !== "") {
+        chaptername = ": "+chaptername;
+      }
       
       var $info = $('nav#info');
-      $('h1', $info).text(manga);
-      $('h2', $info).text(chapterno + ": " + chaptername);
+      $('h1', $info).text(title);
+      $('h2', $info).text(chapterno + chaptername);
       $('date', $info).text(release);
       $('#stat', $info).text(rstatus);
       
-      if (artist == '') { artist = author; }
-      if (artist == '') {
-        $('#arthor').html('Author / Artist unknown.');
+      if (author == artist) {
+        $('#arthor').html('Story / Art by <strong>' + author + '</strong>.');
       } else {
-        if (author == '') { author = artist; }
-        $('#arthor').html('Story / Art by <strong>' + author + '</strong> / <strong>' + artist + '</strong>.');
+        if (artist == '') { artist = author; }
+        if (artist == '') {
+          $('#arthor').html('Author / Artist unknown.');
+        } else {
+          if (author == '') { author = artist; }
+          $('#arthor').html('Story / Art by <strong>' + author + '</strong> / <strong>' + artist + '</strong>.');
+        }
       }
     };
     
@@ -232,19 +264,6 @@
       for (var p in pages) {
         $p.append('<li><img src="'+pages[p]+'" /></li>');
       }
-    };
-    
-    this.updateURL = function(mng, chp) {
-      if (Modernizr.history) {
-        history.pushState({
-            manga: mng,
-            chapter: chp+1
-          },
-          $('title').text(),
-          "http://www.mangareader.net/"+mng+"/"+(chp+1)
-        );
-      }
-      $('#button-permalink').attr('href', "http://www.mangareader.net/"+mng+"/"+(chp+1));
     };
     
     
