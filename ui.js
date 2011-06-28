@@ -7,12 +7,12 @@
         artist = author = rstatus = dir = "",
         chapterno = release = 0,
         description = cover = genera = "";
-    var navs = ['info', 'options', 'hotkeys'];
+    var navs = ['info', 'options', 'hotkeys', 'theme'];
     var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys'];
     var options = [];
     var hotkeys = {
       'next': 68, 'previous': 65, 'home': 87, 'reload': 83,
-      'info': 73, 'options': 79, 'hotkeys': 72
+      'info': 73, 'options': 79, 'hotkeys': 72, 'theme': 84
     };
     var self = this;
     var k;

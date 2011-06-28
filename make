@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json/add/core'
+require 'fileutils'
 require 'optparse'
 require 'base64'
 require 'jsmin'
@@ -13,7 +14,7 @@ def fwrite(file, data)
   end
 end
 
-$makefile = JSON.parse(File.read("Makefile"))
+$makefile = JSON.parse(IO.binread("Makefile"))
 $internal = Date.today.strftime("%y%j")
 
 generated = {
@@ -60,18 +61,19 @@ engine = Sass::Engine.for_file('ui.scss', {
 });
 
 data = {
-  :html      => File.read('ui.html'),
+  :html      => IO.binread('ui.html'),
   :css       => engine.render,
   
-  :home      => Base64.strict_encode64(File.read('img/home.png')),
-  :info      => Base64.strict_encode64(File.read('img/info.png')),
-  :options   => Base64.strict_encode64(File.read('img/options.png')),
-  :permalink => Base64.strict_encode64(File.read('img/permalink.png')),
-  :hotkeys   => Base64.strict_encode64(File.read('img/hotkeys.png')),
-  :previous  => Base64.strict_encode64(File.read('img/previous.png')),
-  :reload    => Base64.strict_encode64(File.read('img/reload.png')),
-  :next      => Base64.strict_encode64(File.read('img/next.png')),
-  :loading   => Base64.strict_encode64(File.read('img/loading.png')),
+  :home      => Base64.strict_encode64(IO.binread('img/home.png')),
+  :info      => Base64.strict_encode64(IO.binread('img/info.png')),
+  :options   => Base64.strict_encode64(IO.binread('img/options.png')),
+  :permalink => Base64.strict_encode64(IO.binread('img/permalink.png')),
+  :hotkeys   => Base64.strict_encode64(IO.binread('img/hotkeys.png')),
+  :theme     => Base64.strict_encode64(IO.binread('img/theme.png')),
+  :previous  => Base64.strict_encode64(IO.binread('img/previous.png')),
+  :reload    => Base64.strict_encode64(IO.binread('img/reload.png')),
+  :next      => Base64.strict_encode64(IO.binread('img/next.png')),
+  :loading   => Base64.strict_encode64(IO.binread('img/loading.png')),
   
   :version   => "#{$makefile["version"]}"
 };
@@ -80,9 +82,9 @@ $makefile["script"].each { |file|
   if file == 'nl'
     generated[:plain] += "\n\n"
   elsif file == 'namespace.js'
-    generated[:plain] += File.read('namespace.js').gsub('$data', JSON.generate(data))
+    generated[:plain] += IO.binread('namespace.js').gsub('$data', JSON.generate(data))
   else
-    generated[:plain] += File.read(file)
+    generated[:plain] += IO.binread(file)
   end
 }
 
@@ -97,7 +99,7 @@ $makefile["userjs"].each { |file|
   elsif file == 'int'
     generated[:userscript] += "// Internal: v. #{$makefile["version"]} (#{$internal})\n"
   else
-    generated[:userscript] += File.read(file)
+    generated[:userscript] += IO.binread(file)
   end
 }
 
@@ -128,13 +130,6 @@ def size(l)
 end
 
 date = Time.new.strftime("%H:%M:%S %P")
-
-# echo "\n          MCR: v. $version         $dateAndTime  \n";
-# echo "**===============================================**\n";
-# echo "||   Total   |   Min'd   |   Str'd   |   Uso'd   ||\n";
-# echo "++-----------+-----------+-----------+-----------++\n";
-# echo "|| $sizeJtot | $sizeJmin | $sizeJstr | $sizeJuso ||\n";
-# echo "**===============================================**\n";
 
 printf("\n      MCR %22s %22s \n", "v. #{$makefile["version"]} (#{$internal})", date)
 puts   "**===============================================================**\n"

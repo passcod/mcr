@@ -1,7 +1,4 @@
 Manga ChapterReader
 ===================
 
-Version 3
-----------
-
-Colour of Death
+See http://mcr.passcod.net/stats for install stats.
