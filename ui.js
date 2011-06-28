@@ -4,14 +4,11 @@
 
   var Ui = function() {
     var manga = title = chapterno = chaptername = artist = author = release = rstatus = "";
-    var navs = ['info', 'options', 'hotkeys', 'theme', 'favs', 'mark'];
-    var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys', 'theme', 'favs', 'mark'];
+    var navs = ['info', 'options', 'hotkeys'];
+    var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys'];
     var hotkeys = {
       'next': 68, 'previous': 65, 'home': 87, 'reload': 83,
-      'info': 73, 'options': 79, 'hotkeys': 72, 'theme': 84, 'favs': 70, 'mark': 66,
-      'theme1': 49, 'theme2': 50, 'theme3': 51,
-      'favadd': -1, 'favdel': -1, 'favtog': -1,
-      'markadd': -1, 'markdel': -1, 'marktog': -1
+      'info': 73, 'options': 79, 'hotkeys': 72
     };
     var self = this;
     var k;
@@ -230,7 +227,7 @@
      * @param  border      Colour for the borders.
      * @return void
      */
-    this.changeColours = function(/** Array */ background, /** Array */ text, /** Array */ border) {
+    var changeColours = function(/** Array */ background, /** Array */ text, /** Array */ border) {
       function colorStyle(/** Array */ color) {
         var colour;
         
@@ -272,6 +269,12 @@
     $('body').append(Ç.data.html).add('header nav').addClass('has-bg');
     $('header nav').addClass('has-border');
     $('#version').text(Ç.data.version);
+    
+    changeColours(
+      [255, 255, 255, 1],
+      [0, 0, 0, 1],
+      [199, 228, 64, 0.8]
+    );
     
     $('nav#main').hover(function() {
       self.showMain();

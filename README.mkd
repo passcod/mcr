@@ -1,71 +1,7 @@
 Manga ChapterReader
 ===================
 
-A Userscript for [mangareader.net](http://mangareader.net) (MR.net) which loads
-a full chapter for easier reading. Mangareader.net has undergone a redesign
-around Winter 2010, and some of its manga kept the old URL format; this script 
-can cater for both without any problems. It uses [jQuery](http://jquery.com) and
-works in Firefox 3.6+ (Greasemonkey), Firefox 4.0+ (Scriptish & Greasemonkey),
-and Google Chrome/Chromium 9+.
+Version 3
+----------
 
-It displays the full chapter in a simple monochrome interface with many options,
-including the ability to cache already visited chapters for faster loading,
-changing the background colour from white to black, toggling hotkeys, and using
-horizontal reading.
-
-It does not offer a manga dropdown (like OneManga Full Chapter Reader did): this
-is a design choice made because of performance and stability issues. Thus, you
-have to manually browse MR.net and find your manga.
-
-There are many features in the works, most only at the design stage yet, but if
-you really want a feature or a fix as soon as possible, the best way is to
-[file a ticket](https://github.com/passcod/Manga-ChapterReader/issues/). Note
-that development speed is greatly affected by my current studies.
-
-Here is a changelog of the versions which were released from the beginning
-onwards. The version format is y.z: e.g. 10.354 is was released on the 354th day
-of 2010.
-
-+ 11.137
-  
-  * Nav transparency increases reading real estate.
-  * Options cleanup: removed obsolete ones, changes defaults for performance & ease of use.
-  
-+ 11.66
-  
-  * Various fixes.
-  * Modified license to more canonical form.
-  
-+ 11.43
-  
-  * Optimization: From Base64 to Ascii85 to, finally, just json. Improves size and speed.
-  * Added MIT license.
-  
-+ 11.35b
-  
-  * Chrome compatible
-  * Removed some debug output
-  
-+ 11.35
-  
-  * Horizontal reading
-  * Chapter selection
-  
-+ 11.34
-  
-  * __Non-functional__
-  * Caching
-  * New Options panel
-  * Fixed same author/artist bug
-  * Prev/Next Navigation. No chapter selection yet.
-  * Permalink
-  
-+ 11.30
-  
-  * __Non-functional__
-  * No cache
-  * Not possible to change options.
-  * Icons for nav panel.
-  * Faster load, lighter footprint.
-  * Fetches and displays manga description and details.
-  * No navigation yet. Have to browse the site to select manga *and* chapters.
+Colour of Death

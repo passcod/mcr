@@ -9,13 +9,13 @@ $(function (){
       "default": true,
       "able": true
     },
-    "horizontal": {
-      "description": "Horizontal reading. Minimum comfortable screen height 768px, recommended 1200px.",
+    "invert": {
+      "description": "Black theme",
       "default": false,
       "able": true
     },
-    "reverse": {
-      "description": "Reverse the order of the pages. Can provide a more natural reading experience, especially in horizontal mode.",
+    "horizontal": {
+      "description": "Horizontal reading. Minimum comfortable screen height 768px, recommended 1200px.",
       "default": false,
       "able": true
     },
@@ -28,16 +28,6 @@ $(function (){
       "description": "Allows the nav/panels to extends to the full width of the screen.",
       "default": true,
       "able": true
-    },
-    "history": {
-      "description": "Update the URL when changing chapter." + (Modernizr.history ? '' : ' Requires a modern browser.'),
-      "default": Modernizr.history,
-      "able": Modernizr.history
-    },
-    "preload": {
-      "description": "Preload the next chapter as you are reading this one." + (Modernizr.postmessage ? '' : ' Requires a modern browser.'),
-      "default": false,
-      "able": Modernizr.postmessage
     }
   };
   
@@ -148,12 +138,6 @@ $(function (){
         manga.loadChapter();
       }
     });
-  
-  ui.changeColours(
-    [255, 255, 255, 1],
-    [0, 0, 0, 1],
-    [199, 228, 64, 0.8]
-  );
   
   for (var n in options) {
     ui.addOption(n, options[n]['description'], options[n]['default']);
