@@ -3,7 +3,6 @@
     "lib/jquery.js",
     "lib/modernizer.js",
     "lib/dom_parser.js",
-    "lib/object_size.js",
     "nl",
     "LICENSE",
     "nl",

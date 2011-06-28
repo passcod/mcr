@@ -39,6 +39,7 @@
      * loaded page, and a `gotchapter` event when all the chapter's pages are
      * loaded. If the pages were already loaded, simply fires `gotchapter`.
      *
+     * @param  silent  Proceed without triggering any event.
      * @return void
      */
 		var get = this.get = function() {
@@ -53,11 +54,11 @@
 							mangaid = mid.match(/([0-9]+);/i)[1]*1;
 						}
 						
-						$(window).trigger("gotpage", [pages.length+1, self]);
+            $(window).trigger("gotpage", [pages.length+1, self]);
 						pages.push(img);
 						get();
 					} else {
-						$(window).trigger("gotchapter", [pages, self]);
+            $(window).trigger("gotchapter", [pages, self]);
 						loaded = true;
 					}
 				});

@@ -252,6 +252,7 @@
     $('body > *').not('script, #container').remove();
     $('body').append(Ç.data.html).add('header nav').addClass('has-bg');
     $('header nav').addClass('has-border');
+    $('#version').text(Ç.data.version);
     
     $('nav#main').hover(function() {
       self.showMain();
