@@ -3,33 +3,30 @@ $(function (){
   function omvKeyPressed() {}
   document.onkeydown = function() {};
   
-  var options = {
-    "spacing": {
+  var options = [
+    {
+      "name": "spacing",
       "description": "Add spacing between pages.",
-      "default": true,
-      "able": true
+      "default": true
     },
-    "invert": {
-      "description": "Black theme",
-      "default": false,
-      "able": true
+    {
+      "name": "invert",
+      "description": "Black theme"
     },
-    "horizontal": {
-      "description": "Horizontal reading. Minimum comfortable screen height 768px, recommended 1200px.",
-      "default": false,
-      "able": true
+    {
+      "name": "horizontal",
+      "description": "Horizontal reading. Minimum comfortable screen height 768px, recommended 1200px."
     },
-    "forced800": {
-      "description": "Force image width to 800. Provides a more uniform reading experience (in vertical mode), but you might want to disable it if the text is too small to read. In horizontal mode, it is better to disable it.",
-      "default": false,
-      "able": true
+    {
+      "name": "forced800",
+      "description": "Force image width to 800. Provides a more uniform reading experience (in vertical mode), but you might want to disable it if the text is too small to read. In horizontal mode, it is better to disable it."
     },
-    "fullwidth": {
+    {
+      "name": "fullwidth",
       "description": "Allows the nav/panels to extends to the full width of the screen.",
-      "default": true,
-      "able": true
+      "default": true
     }
-  };
+  ];
   
   /**
    * Parses the current URL to extract information:
@@ -101,7 +98,9 @@ $(function (){
         manga.info().artist,
         manga.info().author,
         manga.info().pubdate,
-        manga.info().status
+        manga.info().status,
+        manga.info().description,
+        manga.info().cover
       );
       
       ui.setStatus('');
@@ -109,7 +108,7 @@ $(function (){
     })
     
     .bind("gotpage", function(e, page, chap) {
-      ui.setStatus('Loading Ch. '+chap.num()+' ('+page+')');
+      ui.setStatus('Loading Ch. '+(+chap.num())+' ('+page+')');
     })
     
     
@@ -121,27 +120,26 @@ $(function (){
       ui.setStatus('This is the last chapter');
     })
     
+    
+    /* Navigation */
     .bind("keyreload hitreload", function() {
       window.location = $('#button-permalink').attr('href');
     })
-    .bind("keyhome hithome", function() {
-      window.location = "http://www.mangareader.net";
-    })
     
     .bind("keyprevious hitprevious", function() {manga.previousChapter();})
-    .bind("keynext hitnext", function() {manga.nextChapter();})
-    
-    .bind("popstate", function() {
-      info = parseURL();
-      if (manga !== -1) {
-        manga.setChapter(info.chapter);
-        manga.loadChapter();
-      }
-    });
+    .bind("keynext hitnext", function() {manga.nextChapter();});
   
   for (var n in options) {
-    ui.addOption(n, options[n]['description'], options[n]['default']);
+    ui.addOption(options[n]);
+    
+    (function(name) {
+      $(window).bind("keyopt"+name+" hitopt"+name, function() {
+        ui["do_"+name](ui.getOption(name));
+        console.log('Got opt: '+name);
+      });
+    })(options[n]['name']);
   }
+  ui.postInit();
   
   ui.setStatus('Ready');
 });
