@@ -10,7 +10,8 @@ $lopts = array(
   "help",
   "write",
   "brief",
-  "quiet"
+  "quiet",
+  "copy:"
 );
 
 $args = getopt($sopts, $lopts);
@@ -56,6 +57,9 @@ Usage: php <?php echo $argv[0]; ?> [OPTIONS]
         
     -s=SUFFIX, --suffix=SUFFIX
        Appends SUFFIX to the version number.
+    
+    --copy=PATH
+      Copies the resulting mcr.js to the given PATH.
     
     -w, --write
        Overwrites the VERSION file
@@ -157,6 +161,10 @@ function size($l) {
     case 0: default: $r .= "Bts"; break;
   }
   return $r;
+}
+
+if (!empty($vals['copy'])) {
+  file_put_contents(realpath($vals['copy']), $js);
 }
 
 ?>

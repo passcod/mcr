@@ -43,7 +43,7 @@ table {
   border-spacing: 0; }
 
 body {
-  font-family: sans-serif; }
+  font-family: Helvetica, sans-serif; }
 
 #container {
   width: 800px;
@@ -149,8 +149,7 @@ h2 {
 .horizontal ul {
   margin: 0 0 1em 0;
   padding: 0;
-  float: left;
-  width: 100%; }
+  float: left; }
 .horizontal li {
   float: left; }
 

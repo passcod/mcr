@@ -3,15 +3,29 @@
 (function(window) {
 
   var Ui = function() {
-    var manga = title = chapterno = chaptername = artist = author = release = rstatus = "";
+    var manga = title = chaptername = "",
+        artist = author = rstatus   = "",
+        chapterno = release = 0,
+        description = cover = "";
     var navs = ['info', 'options', 'hotkeys'];
     var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys'];
+    var options = [];
     var hotkeys = {
       'next': 68, 'previous': 65, 'home': 87, 'reload': 83,
       'info': 73, 'options': 79, 'hotkeys': 72
     };
     var self = this;
     var k;
+    
+    /**
+     * Returns the value if non-empty, or the default else.
+     */
+    var def = function(val, def) {
+      if (val === "" || val === undefined) {
+        return def;
+      }
+      return val;
+    };
     
     /**
      * Change the status message.
@@ -42,7 +56,7 @@
     
     /**
      * Changes the manga info. All are optional and will default to their
-     * previous values or `""`.
+     * previous values or `""`. Do NOT use `false` to use the default.
      * 
      * @param  _manga        The manga's name.
      * @param  _chapterno    The chapter's number.
@@ -51,6 +65,8 @@
      * @param  _author       The author.
      * @param  _release      The release date.
      * @param  _rstatus      The release status.
+     * @param  _description  The manga's description.
+     * @param  _cover        URL to the manga's cover image.
      * @return void
      */
     this.setInfo = function(/** String  */ _manga,
@@ -59,14 +75,9 @@
                             /** String  */ _artist,
                             /** String  */ _author,
                             /** Integer */ _release,
-                            /** String  */ _rstatus) {
-      function def(val, def) {
-        if (val === "" || val === false) {
-          return def;
-        }
-        return val;
-      }
-      
+                            /** String  */ _rstatus,
+                            /** String  */ _description,
+                            /** String  */ _cover) {
       manga       = def(_manga,       manga);
       chapterno   = def(_chapterno+1, chapterno);
       chaptername = def(_chaptername, chaptername);
@@ -74,6 +85,8 @@
       author      = def(_author,      author);
       release     = def(_release,     release);
       rstatus     = def(_rstatus,     rstatus);
+      description = def(_description, description);
+      cover       = def(_cover,       cover);
       
       title = manga.replace(/-/g, ' ').replace(/^([a-z])|\s+([a-z])/g, function ($1) {
         return $1.toUpperCase();
@@ -88,6 +101,8 @@
       $('h2', $info).text(chapterno + chaptername);
       $('date', $info).text(release);
       $('#stat', $info).text(rstatus);
+      $('#cover', $info).attr('src', cover);
+      $('#description', $info).text(description);
       
       if (author == artist) {
         $('#arthor').html('Story / Art by <strong>' + author + '</strong>.');
@@ -106,15 +121,30 @@
      * Adds an option to nav#options. Each option has an id: #option-<name>.
      * The `default_state` is optional, and will default to `false`.
      * 
-     * @param  name           A unique name for that option.
-     * @param  description    A description for that option.
-     * @param  default_state  Optional. Defaults to false.
+     * name           A unique name for that option.
+     * description    A description for that option.
+     * default        Optional. Defaults to false.
+     * able           Optional. Defaults to true.
+     * hotkey         Optional. Defaults to -1;
+     * 
+     * @param  definition  An object containing the above settings.
      * @return void
      */
-    this.addOption = function(/** String */ name, /** String */ description, /** Boolean */ default_state) {
-      $('nav#options').append('<p id="option-'+name+'"><label><input type="checkbox" /> '+description+'</label></p>');
-      if (default_state === true) $('#option-'+name+' input').attr('checked', 'checked');
-      hotkeys['opt'+name] = -1;
+    this.addOption = function(/** Object */ definition) {
+      definition['default'] = def(definition['default'], false);
+      definition['able'] = def(definition['able'], true);
+      definition['hotkey'] = def(definition['hotkey'], -1);
+      
+      $('nav#options').append('<p id="option-'+definition["name"]+'"><label><input type="checkbox" /> '+definition["description"]+'</label></p>');
+      
+      var $opt = $('#option-'+definition["name"]+' input');
+      
+      if (definition["default"] === true) $opt.attr('checked', 'checked');
+      if (definition["able"] === false) $opt.attr('disabled', 'disabled');
+      
+      hotkeys['opt'+definition["name"]] = definition["hotkey"];
+      
+      options.push(definition['name']);
     };
     
     /**
@@ -126,7 +156,7 @@
      */
     this.setOption = function(/** String */ name, /** Boolean */ state) {
       $('#option-'+name+' input').removeAttr('checked');
-      if (state) $('#option-'+name+' input').attr('checked', 'checked');
+      if (state) {$('#option-'+name+' input').attr('checked', 'checked');}
     };
     
     /**
@@ -137,6 +167,23 @@
      */
     this.getOption = function(/** String */ name) {
       return $('#option-'+name+' input').is(':checked');
+    };
+    
+    /**
+     * Sets the able state of an option and returns it.
+     *
+     * @param  name  The unique name of the option.
+     * @param  able  Optional. Defaults to the previous value.
+     * @return void
+     */
+    this.ableOption = function(/** String */ name, /** Boolean */ able) {
+      var $opt = $('#option-'+name+' input');
+      var able = def(able, $opt.attr('disabled') !== "disabled");
+      
+      $opt.removeAttr('disabled');
+      if (!able) {$opt.attr('disabled', 'disabled');}
+      
+      return able;
     };
     
     /**
@@ -218,6 +265,7 @@
       hotkeys[name] = key;
     };
     
+    
     /**
      * Changes the UI colours. Colours must be [r, g, b, a] where each component
      * goes from 0 to 255 except opacity which goes from 0.0 to 1.0.
@@ -261,6 +309,38 @@
       for (var p in pages) {
         $p.append('<li><img src="'+pages[p]+'" /></li>');
       }
+      $("html:not(:animated),body:not(:animated)").animate({ scrollTop: 0, scrollLeft: 0}, 500 );
+    };
+    
+    
+    /* Options */
+    
+    this.do_spacing    = function(bool) {
+      $('article').toggleClass('spaced', !!bool);
+    };
+    this.do_horizontal = function(bool) {
+      $('article').toggleClass('horizontal', !!bool);
+    };
+    this.do_forced800  = function(bool) {
+      $('article').toggleClass('forced800', !!bool);
+    };
+    this.do_fullwidth  = function(bool) {
+      $('#container').toggleClass('fullwidth', !!bool);
+    };
+    this.do_invert = function(bool) {
+      if (bool) {
+        changeColours(
+          [0, 0, 0, 0.95],
+          [200, 200, 200, 1],
+          [50, 50, 50, 0.2]
+        );
+      } else {
+        changeColours(
+          [255, 255, 255, 0.8],
+          [0, 0, 0, 1],
+          [200, 200, 200, 0.2]
+        );
+      }
     };
     
     
@@ -271,9 +351,9 @@
     $('#version').text(Ç.data.version);
     
     changeColours(
-      [255, 255, 255, 1],
+      [255, 255, 255, 0.8],
       [0, 0, 0, 1],
-      [199, 228, 64, 0.8]
+      [200, 200, 200, 0.2]
     );
     
     $('nav#main').hover(function() {
@@ -299,6 +379,18 @@
         });
       })(navs[k], this);
     }
+    
+    this.postInit = function() {
+      for (k in options) {
+        (function(name) {
+          $('#option-'+name).click(function() {
+            $(window).trigger("hitopt"+name);
+            console.log('Hit opt: '+name);
+          });
+          console.log('Set opt: '+name);
+        })(options[k]);
+      }
+    };
     
     for (k in buttons) {
       (function(name) {
