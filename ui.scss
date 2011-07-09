@@ -127,6 +127,10 @@ nav#info {
   h2:before {
     content: 'Ch: ';
   }
+  
+  lh {
+    font-weight: bold;
+  }
 }
 
 nav#options {
@@ -138,13 +142,10 @@ nav#options {
 article {
   text-align: center;
   
-  img {
-    display: inline-block;
-  }
-  
   ul {
     list-style: none;
-    padding: 0;
+    padding: 0 auto;
+    float: left;
   }
 }
 
@@ -185,7 +186,6 @@ h2 {
   ul {
     margin: 0 0 1em 0;
     padding: 0;
-    float: left;
   }
 
   li {

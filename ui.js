@@ -4,9 +4,9 @@
 
   var Ui = function() {
     var manga = title = chaptername = "",
-        artist = author = rstatus   = "",
+        artist = author = rstatus = dir = "",
         chapterno = release = 0,
-        description = cover = "";
+        description = cover = genera = "";
     var navs = ['info', 'options', 'hotkeys'];
     var buttons = ['previous', 'next', 'reload', 'home', 'info', 'options', 'permalink', 'hotkeys'];
     var options = [];
@@ -21,11 +21,18 @@
      * Returns the value if non-empty, or the default else.
      */
     var def = function(val, def) {
-      if (val === "" || val === undefined) {
+      if (val === "" || val === undefined || val === null) {
         return def;
       }
       return val;
     };
+    
+    /**
+     * @return True if n is a number
+     */
+    var isNumber = function(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
     
     /**
      * Change the status message.
@@ -65,9 +72,13 @@
      * @param  _author       The author.
      * @param  _release      The release date.
      * @param  _rstatus      The release status.
+     * @param  _dir          The reading direction.
+     * @param  _genera       The genre(s).
      * @param  _description  The manga's description.
      * @param  _cover        URL to the manga's cover image.
      * @return void
+     *
+     * @todo   Use a single object instead of many params.
      */
     this.setInfo = function(/** String  */ _manga,
                             /** Integer */ _chapterno,
@@ -76,6 +87,8 @@
                             /** String  */ _author,
                             /** Integer */ _release,
                             /** String  */ _rstatus,
+                            /** String  */ _dir,
+                            /** String  */ _genera,
                             /** String  */ _description,
                             /** String  */ _cover) {
       manga       = def(_manga,       manga);
@@ -85,6 +98,8 @@
       author      = def(_author,      author);
       release     = def(_release,     release);
       rstatus     = def(_rstatus,     rstatus);
+      dir         = def(_dir,         dir);
+      genera      = def(_genera,      genera);
       description = def(_description, description);
       cover       = def(_cover,       cover);
       
@@ -103,6 +118,11 @@
       $('#stat', $info).text(rstatus);
       $('#cover', $info).attr('src', cover);
       $('#description', $info).text(description);
+      $('#dir', $info).text('Direction : '+dir);
+      
+      for (var i in genera.split(' ')) {
+        $('#genre').append('<li>'+genera.split(' ')[i]+'</li>');
+      }
       
       if (author == artist) {
         $('#arthor').html('Story / Art by <strong>' + author + '</strong>.');
@@ -320,6 +340,18 @@
     };
     this.do_horizontal = function(bool) {
       $('article').toggleClass('horizontal', !!bool);
+      
+      if (bool) {
+        var k, t = $('body').width(); $p = $('article img');
+        for (k in $p) {
+          if (isNumber(k)) {
+            t += $($p[k]).width() + 50;
+          }
+        }
+        $('article, article ul').width(t);
+      } else {
+        $('article, article ul').width('100%');
+      }
     };
     this.do_forced800  = function(bool) {
       $('article').toggleClass('forced800', !!bool);
@@ -385,9 +417,7 @@
         (function(name) {
           $('#option-'+name).click(function() {
             $(window).trigger("hitopt"+name);
-            console.log('Hit opt: '+name);
           });
-          console.log('Set opt: '+name);
         })(options[k]);
       }
     };

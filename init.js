@@ -12,10 +12,12 @@ $(function (){
     {
       "name": "invert",
       "description": "Black theme"
+      //"hotkey": 189
     },
     {
       "name": "horizontal",
       "description": "Horizontal reading. Minimum comfortable screen height 768px, recommended 1200px."
+      //"hotkey": 187
     },
     {
       "name": "forced800",
@@ -75,9 +77,17 @@ $(function (){
       
       ui.display(pages);
       
+      if (ui.getOption('horizontal')) {
+        var k, t = $('body').width(); $p = $('article img');
+        for (k in $p) {
+          t += $($p[k]).width() + 50;
+        }
+        $('article, article ul').width(t);
+      }
+      
       if (gotinfo) {
         ui.setInfo(
-          false,
+          null,
           manga.getChapter(),
           manga.chapters()[manga.getChapter()].name
         );
@@ -91,6 +101,7 @@ $(function (){
       manga.addChapter(c);
       gotinfo = true;
       
+      try {
       ui.setInfo(
         manga.info().name,
         manga.getChapter(),
@@ -99,9 +110,12 @@ $(function (){
         manga.info().author,
         manga.info().pubdate,
         manga.info().status,
+        manga.info().direct,
+        manga.info().genres,
         manga.info().description,
         manga.info().cover
       );
+      } catch(ee) {}
       
       ui.setStatus('');
       ui.updateURL();
@@ -135,7 +149,6 @@ $(function (){
     (function(name) {
       $(window).bind("keyopt"+name+" hitopt"+name, function() {
         ui["do_"+name](ui.getOption(name));
-        console.log('Got opt: '+name);
       });
     })(options[n]['name']);
   }
