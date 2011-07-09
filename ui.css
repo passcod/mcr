@@ -109,17 +109,18 @@ nav#info h1:before {
   content: 'Title: '; }
 nav#info h2:before {
   content: 'Ch: '; }
+nav#info lh {
+  font-weight: bold; }
 
 nav#options p {
   padding: 0.5em; }
 
 article {
   text-align: center; }
-  article img {
-    display: inline-block; }
   article ul {
     list-style: none;
-    padding: 0; }
+    padding: 0 auto;
+    float: left; }
 
 .forced800 img {
   width: 800px; }
@@ -148,8 +149,7 @@ h2 {
 
 .horizontal ul {
   margin: 0 0 1em 0;
-  padding: 0;
-  float: left; }
+  padding: 0; }
 .horizontal li {
   float: left; }
 

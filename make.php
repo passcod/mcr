@@ -26,7 +26,8 @@ include "lib/htmlmin.php";
 $version = chop(file_get_contents('VERSION'));
 $compile = json_decode(file_get_contents('Make.json'), true);
 
-$version = date('y.z');
+$internal = date('yz');
+$version  = $compile['version'];
 
 if (!empty($vals['v'])) {
   $version = $vals['v'];
@@ -41,7 +42,7 @@ if (!empty($vals['s'])) {
 }
 
 if ( in_array('w', $args) || in_array('write', $args) ) {
-  file_put_contents('VERSION', $version);
+  file_put_contents('VERSION', "$version ($internal)");
 }
 
 if ( in_array('h', $args) || in_array('help', $args) ) {
@@ -65,13 +66,10 @@ Usage: php <?php echo $argv[0]; ?> [OPTIONS]
        Overwrites the VERSION file
     
     -b, --brief
-       Only output the version.
+       Only outputs the version.
     
     -q, --quiet
-       No output.
-
-
-Running with no arguments uses `date("y.z")` for the version.
+       Outputs nothing.
 <?php exit;
 }
 
@@ -116,6 +114,8 @@ foreach ( $compile['userjs'] as $file ) {
     $userjs .= "\n\n";
   } elseif ( $file == 'ver' ) {
     $userjs .= "// @version        ".$version."\n";
+  } elseif ( $file == 'int' ) {
+    $userjs .= "// Internal: v. $version ($internal)\n";
   } else {
     $userjs .= file_get_contents($file);
   }
@@ -134,12 +134,15 @@ if ( in_array('q', $args) || in_array('quiet', $args) ) {
 
 $dateAndTime = date('H:i:s a');
 
-$sizeJtot = size(strlen(  $js  ));
-$sizeJmin = size(strlen(  $jsm ));
-$sizeJstr = size(strlen(  $jse ));
-$sizeJuso = size(strlen($userjs));
+$jsp = $js;
+$jsu = $userjs;
 
-echo "\n        MCR 3: v. $version       $dateAndTime    \n";
+$sizeJtot = size(strlen($jsp));
+$sizeJmin = size(strlen($jsm));
+$sizeJstr = size(strlen($jse));
+$sizeJuso = size(strlen($jsu));
+
+echo "\n          MCR: v. $version         $dateAndTime  \n";
 echo "**===============================================**\n";
 echo "||   Total   |   Min'd   |   Str'd   |   Uso'd   ||\n";
 echo "++-----------+-----------+-----------+-----------++\n";
@@ -154,7 +157,7 @@ function size($l) {
       $l /= 1024;
     }
   }
-  $r = ""+round($l, 2);
+  $r = sprintf("%.2f", $l); //round($l, 2);
   switch($s) {
     case 2: $r .= "MiB"; break;
     case 1: $r .= "KiB"; break;
