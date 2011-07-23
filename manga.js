@@ -25,7 +25,7 @@
           numbers.push(chap['chapter']);
           chapters[ chap['chapter'] ] = {
             'name': name,
-            'data': new Ç.Chapter(manga, chap['chapter'])
+            'data': new Chapter(manga, chap['chapter'])
           };
         }
         
@@ -157,5 +157,5 @@
 		};
 	};
 	
-	window.Ç.Manga = Manga;
+	window.Manga = Manga;
 })(window);

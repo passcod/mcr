@@ -1,140 +1,174 @@
-#!/usr/bin/env ruby
+<?php
 
-require 'json/add/core'
-require 'fileutils'
-require 'optparse'
-require 'base64'
-require 'jsmin'
-require 'sass'
-require 'date'
+$sopts  = "v:c:hq";
+$lopts = array(
+  "version:",
+  "help",
+  "quiet",
+  "copy:"
+);
 
-def fwrite(file, data)
-  File.open(file, "w") do |f|
-    f.write(data)
-  end
-end
+$args = getopt($sopts, $lopts);
+$vals = $args;
+$args = array_keys($args);
 
-$makefile = JSON.parse(IO.binread("Makefile"))
-$internal = Date.today.strftime("%y%j")
+date_default_timezone_set('Pacific/Auckland');
 
-generated = {
-  :plain       => "",
-  :minified    => "",
-  :stringified => "",
-  :userscript  => ""
-};
+include "lib/htmlmin.php";
+include "lib/rest_helper.php";
 
-options = {
-  :quiet => false,
-  :copy  => "bin/mcr.js"
-};
+$makefile = json_decode(file_get_contents('Makefile'), true);
+$internal = date('yz');
+$version  = $makefile['version'];
 
-optparse = OptionParser.new do |opts|
-  
-  opts.on('-v', '--version STRING', "Specify the version string") do |v|
-    $makefile["version"] = v
-  end
-  
-  opts.on('-c', '--copy PATH', "Copy `mcr.js' to PATH") do |file|
-    options[:copy] = file
-  end
-  
-  opts.on( '-w', '--write', "Overwrite the VERSION file" ) do
-    fwrite('VERSION', "#{$makefile["version"]} (#{$internal})");
-  end
-  
-  opts.on( '-q', '--quiet', "Output nothing" ) do
-    options[:quiet] = true
-  end
-  
-  opts.on( '-h', '--help', 'Display this screen' ) do
-    puts opts
-    exit
-  end
-end
-
-optparse.parse!
-
-engine = Sass::Engine.for_file('ui.scss', {
-  :style  => :compressed,
-  :syntax => :scss
-});
-
-data = {
-  :html      => IO.binread('ui.html'),
-  :css       => engine.render,
-  
-  :home      => Base64.strict_encode64(IO.binread('img/home.png')),
-  :info      => Base64.strict_encode64(IO.binread('img/info.png')),
-  :options   => Base64.strict_encode64(IO.binread('img/options.png')),
-  :permalink => Base64.strict_encode64(IO.binread('img/permalink.png')),
-  :hotkeys   => Base64.strict_encode64(IO.binread('img/hotkeys.png')),
-  :theme     => Base64.strict_encode64(IO.binread('img/theme.png')),
-  :previous  => Base64.strict_encode64(IO.binread('img/previous.png')),
-  :reload    => Base64.strict_encode64(IO.binread('img/reload.png')),
-  :next      => Base64.strict_encode64(IO.binread('img/next.png')),
-  :loading   => Base64.strict_encode64(IO.binread('img/loading.png')),
-  
-  :version   => "#{$makefile["version"]}"
-};
-
-$makefile["script"].each { |file|
-  if file == 'nl'
-    generated[:plain] += "\n\n"
-  elsif file == 'namespace.js'
-    generated[:plain] += IO.binread('namespace.js').gsub('$data', JSON.generate(data))
-  else
-    generated[:plain] += IO.binread(file)
-  end
+if (!empty($vals['v'])) {
+  $version = $vals['v'];
+} if (!empty($vals['version'])) {
+  $version = $vals['version'];
 }
 
-generated[:minified] = JSMin.minify(generated[:plain])
-generated[:stringified] = generated[:minified].inspect
-
-$makefile["userjs"].each { |file|
-  if file == 'nl'
-    generated[:userscript] += "\n\n"
-  elsif file == 'ver'
-    generated[:userscript] += "// @version        #{$makefile["version"]}\n"
-  elsif file == 'int'
-    generated[:userscript] += "// Internal: v. #{$makefile["version"]} (#{$internal})\n"
-  else
-    generated[:userscript] += IO.binread(file)
-  end
+if ( in_array('w', $args) || in_array('write', $args) ) {
+  file_put_contents('VERSION', "$version ($internal)");
 }
 
-generated[:userscript] += "\n\nfunction GetIt() { return #{generated[:stringified]}; }";
+if ( in_array('h', $args) || in_array('help', $args) ) {
+  ?>
+Compiles the script according to the rules defined in Makefile
+Usage: php <?php echo $argv[0]; ?> [OPTIONS]
 
+    -h, --help
+       Display this message
+    
+    -v, --version=VERSION
+       Specify the version number.
+    
+    -c, --copy=PATH
+      Copies the resulting mcr.min.js to the given PATH.
+    
+    -q, --quiet
+       Outputs nothing.
+<?php exit;
+}
 
-fwrite("bin/mcr.js", generated[:plain])
-fwrite("bin/mcr.min.js", generated[:minified])
-fwrite("bin/mcr.user.js", generated[:userscript])
-fwrite(options[:copy], generated[:plain])
+ob_start();
+passthru('sass --style compressed ui.scss');
+$css = ob_get_clean();
 
-if options[:quiet]
-  exit
-end
-
-def size(l)
-  size = 0
-  sizes = [" bytes"," KiB"," MiB"]
+$data = array(
+  'html' => Minify_HTML::minify(file_get_contents('ui.html')),
+  'css'  => $css,
   
-  2.times { |i|
-    if l > 1000
-      size += 1
-      l /= 1024.0
-    end
+  'home'      => base64_encode(file_get_contents('icons/home.png')),
+  'info'      => base64_encode(file_get_contents('icons/info.png')),
+  'options'   => base64_encode(file_get_contents('icons/options.png')),
+  'permalink' => base64_encode(file_get_contents('icons/permalink.png')),
+  'hotkeys'   => base64_encode(file_get_contents('icons/hotkeys.png')),
+  'previous'  => base64_encode(file_get_contents('icons/previous.png')),
+  'reload'    => base64_encode(file_get_contents('icons/reload.png')),
+  'next'      => base64_encode(file_get_contents('icons/next.png')),
+  'loading'   => base64_encode(file_get_contents('icons/loading.png')),
+  
+  'version' => "$version"
+);
+
+$js = "";
+foreach ( $makefile['script'] as $file ) {
+  if ( $file == 'nl' ) {
+    $js .= "\n\n";
+  } elseif ($file == 'namespace.js') {
+    $js .= str_replace('$data', json_encode($data), file_get_contents('namespace.js'));
+  } else {
+    $js .= file_get_contents($file);
   }
-  
-  sprintf("%.2f", l) + sizes[size]
-end
+}
 
-date = Time.new.strftime("%H:%M:%S %P")
+file_put_contents('build/mcr.js', $js);
 
-printf("\n      MCR %22s %22s \n", "v. #{$makefile["version"]} (#{$internal})", date)
-puts   "**===============================================================**\n"
-puts   "||     Total     |     Min'd     |     Str'd     |     Uso'd     ||\n"
-puts   "++---------------+---------------+---------------+---------------++\n"
-printf("|| %13s | %13s | %13s | %13s ||\n", size(generated[:plain].length), size(generated[:minified].length), size(generated[:stringified].length), size(generated[:userscript].length))
-puts   "**===============================================================**\n"
-puts   "      Copied to #{options[:copy]}\n"
+$gcl = rest_helper('http://closure-compiler.appspot.com/compile', array(
+    'code_url' => 'http://code.jquery.com/jquery-latest.js',
+    'js_code'  => $js,
+    'compilation_level' => 'SIMPLE_OPTIMIZATIONS',
+    'output_format' => 'json',
+    'output_info'   => 'compiled_code',
+    'warning_level' => 'QUIET'
+  ), 'POST', 'json');
+
+$jsm = $gcl['compiledCode'];
+
+file_put_contents('build/mcr.min.js', $jsm);
+
+$jse = json_encode(file_get_contents('build/mcr.min.js'));
+
+$userjs = "";
+
+foreach ( $makefile['userjs'] as $file ) {
+  if ( $file == 'nl' ) {
+    $userjs .= "\n\n";
+  } elseif ( $file == 'ver' ) {
+    $userjs .= "// @version        ".$version."\n";
+  } elseif ( $file == 'int' ) {
+    $userjs .= "// Internal: v. $version ($internal)\n";
+  } elseif ( $file == 'userjs/body.js' ) {
+    $userjs .= str_replace('$scrfile', $jse, file_get_contents($file));
+  } else {
+    $userjs .= file_get_contents($file);
+  }
+}
+
+file_put_contents('build/mcr.user.js', $userjs);
+
+if ( in_array('q', $args) || in_array('quiet', $args) ) {
+  exit(0);
+} elseif ( in_array('b', $args) || in_array('brief', $args) ) {
+  echo $version;
+  exit(0);
+}
+
+$dateAndTime = date('H:i:s a');
+
+$jsp = $js;
+$jsm = $jsm;
+$jsu = $userjs;
+
+$sizeJtot = size(strlen($jsp));
+$sizeJmin = size(strlen($jsm));
+$sizeJstr = size(strlen($jse));
+$sizeJuso = size(strlen($jsu));
+
+echo "\n          MCR: v. $version         $dateAndTime  \n";
+echo "**===============================================**\n";
+echo "||   Total   |   Min'd   |   Str'd   |   Uso'd   ||\n";
+echo "++-----------+-----------+-----------+-----------++\n";
+echo "|| $sizeJtot | $sizeJmin | $sizeJstr | $sizeJuso ||\n";
+echo "**===============================================**\n";
+
+function size($l) {
+  $s = 0;
+  for ($i=0;$i<2;$i++) {
+    if ($l > 1000) {
+      $s++;
+      $l /= 1024;
+    }
+  }
+  $r = sprintf("%6.2f", $l); //round($l, 2);
+  switch($s) {
+    case 2: $r .= "MiB"; break;
+    case 1: $r .= "KiB"; break;
+    case 0: default: $r .= "Bts"; break;
+  }
+  return $r;
+}
+
+if (!empty($vals['copy'])) {
+  file_put_contents(realpath($vals['copy']), $jsm);
+  echo "     Copied to ".$vals['copy'];
+}
+
+if (!empty($vals['c'])) {
+  file_put_contents(realpath($vals['c']), $jsm);
+  echo "     Copied to ".$vals['c'];
+}
+
+echo "\n";
+
+?>

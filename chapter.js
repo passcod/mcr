@@ -95,5 +95,5 @@
 		};
 	};
 	
-	window.Ç.Chapter = Chapter;
+	window.Chapter = Chapter;
 })(window);

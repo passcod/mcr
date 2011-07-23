@@ -17,9 +17,6 @@ time, mark, audio, video {
 	vertical-align: baseline;
   color: inherit;
 }
-h1, h2, h3, h4, h5, h6, p, pre, ol, ul, li {
-  margin: 0.5em 0;
-}
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section {
 	display: block;
@@ -55,88 +52,7 @@ table {
 
 
 body {
-  font-family: Helvetica, sans-serif;
-}
-
-#container {
-  width: 800px;
-  margin: 5em auto;
-}
-
-header {
-  a {
-    text-decoration: none;
-  }
-  
-  nav {
-    top: 50px;
-    left: auto;
-    width: 800px;
-    border: 5px solid;
-    padding: 5px;
-    display: none;
-    z-index: 100;
-    position: fixed;
-    font-size: 0.8em;
-    text-align: justify;
-  }
-}
-
-.fullwidth header nav {
-  min-width: 500px;
-  width: 90%;
-  left: 5%;
-}
-
-nav#main {
-  top: -36px;
-  height: 24px;
-  line-height: 24px;
-  display: block;
-  
-  img {
-    vertical-align: middle;
-  }
-}
-
-.has-rule {
-  @include css3(column-count, 2);
-  @include css3(column-count-gap, 2em);
-  @include css3(column-rule-style, solid);
-  @include css3(column-rule-width, 1px);
-}
-
-nav#info {
-  img#cover {
-    float: right;
-    height: 20em;
-    margin: 1em;
-  }
-  
-  h1, h2 {
-    &:before {
-      font-size: 80%;
-      font-weight: normal;
-    }
-  }
-  
-  h1:before {
-    content: 'Title: ';
-  }
-  
-  h2:before {
-    content: 'Ch: ';
-  }
-  
-  lh {
-    font-weight: bold;
-  }
-}
-
-nav#options {
-  p {
-    padding: 0.5em;
-  }
+  font-family: 'Open Sans', Helvetica, sans-serif;
 }
 
 article {
@@ -147,21 +63,25 @@ article {
     padding: 0 auto;
     float: left;
   }
-}
+  
+  &.forced800 img {
+    width: 800px;
+  }
+  
+  &.horizontal {
+    ul {
+      margin: 0 0 1em 0;
+      padding: 0;
+    }
 
-.forced800 img {
-  width: 800px;
-}
-
-footer nav {
-  font-size: 0.7em;
-  margin: 1em auto;
-  text-align: center;
-}
-
-input[type=button] {
-  border: 1px solid;
-  background-color: transparent;
+    li {
+      float: left;
+    }
+  }
+  
+  &.spaced li {
+    padding: 0.5em;
+  }
 }
 
 a {
@@ -172,39 +92,4 @@ a {
   &:hover, &:focus {
     text-decoration: none;
   }
-}
-
-h1 {
-  font-size: 1.7em;
-}
-
-h2 {
-  font-size: 1.2em;
-}
-
-.horizontal {
-  ul {
-    margin: 0 0 1em 0;
-    padding: 0;
-  }
-
-  li {
-    float: left;
-  }
-}
-
-.spaced li {
-  padding: 0.5em;
-}
-
-div#mask {
-  background: black;
-  opacity: 0.8;
-  display: none;
-  width: 100%;
-  height: 100%;
-  z-index: 50;
-  position: fixed;
-  top: 0px;
-  left: 0px;
 }

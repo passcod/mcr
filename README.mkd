@@ -1,4 +1,0 @@
-Manga ChapterReader
-===================
-
-See http://mcr.passcod.net/stats for install stats.
