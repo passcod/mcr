@@ -1,11 +1,12 @@
 <?php
 
-$sopts  = "v:c:hq";
+$sopts  = "v:c:hqs";
 $lopts = array(
   "version:",
+  "copy:",
   "help",
   "quiet",
-  "copy:"
+  "skip"
 );
 
 $args = getopt($sopts, $lopts);
@@ -27,8 +28,9 @@ if (!empty($vals['v'])) {
   $version = $vals['version'];
 }
 
-if ( in_array('w', $args) || in_array('write', $args) ) {
-  file_put_contents('VERSION', "$version ($internal)");
+$skip = false;
+if ( in_array('s', $args) || in_array('skip', $args) ) {
+  $skip = true;
 }
 
 if ( in_array('h', $args) || in_array('help', $args) ) {
@@ -44,6 +46,9 @@ Usage: php <?php echo $argv[0]; ?> [OPTIONS]
     
     -c, --copy=PATH
       Copies the resulting mcr.min.js to the given PATH.
+    
+    -s, --skip
+       Skip minification. For use with test.user.js.
     
     -q, --quiet
        Outputs nothing.
@@ -61,12 +66,10 @@ $data = array(
   'home'      => base64_encode(file_get_contents('icons/home.png')),
   'info'      => base64_encode(file_get_contents('icons/info.png')),
   'options'   => base64_encode(file_get_contents('icons/options.png')),
-  'permalink' => base64_encode(file_get_contents('icons/permalink.png')),
   'hotkeys'   => base64_encode(file_get_contents('icons/hotkeys.png')),
   'previous'  => base64_encode(file_get_contents('icons/previous.png')),
-  'reload'    => base64_encode(file_get_contents('icons/reload.png')),
   'next'      => base64_encode(file_get_contents('icons/next.png')),
-  'loading'   => base64_encode(file_get_contents('icons/loading.png')),
+  'favs'   => base64_encode(file_get_contents('icons/favs.png')),
   
   'version' => "$version"
 );
@@ -83,6 +86,24 @@ foreach ( $makefile['script'] as $file ) {
 }
 
 file_put_contents('build/mcr.js', $js);
+
+if ($skip) {
+  echo "Built quickly, ";
+  
+  if (!empty($vals['copy'])) {
+    file_put_contents(realpath($vals['copy']), $js);
+    echo "and copied to ".$vals['copy']." ... ";
+  }
+
+  if (!empty($vals['c'])) {
+    file_put_contents(realpath($vals['c']), $js);
+    echo "and copied to ".$vals['c']." ... ";
+  }
+  
+  echo "happy testing!\n";
+  
+  exit(1);
+}
 
 $gcl = rest_helper('http://closure-compiler.appspot.com/compile', array(
     'code_url' => 'http://code.jquery.com/jquery-latest.js',

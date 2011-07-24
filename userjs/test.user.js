@@ -24,6 +24,11 @@ if (regular.test(window.location.href)) {
 	
   var script = document.createElement('script');
 	script.type = "text/javascript";
+	script.src = "http://code.jquery.com/jquery-latest.min.js";
+	document.getElementsByTagName('body')[0].appendChild(script);
+  
+  var script = document.createElement('script');
+	script.type = "text/javascript";
 	script.src = "http://localhost/mcr.js";
 	document.getElementsByTagName('body')[0].appendChild(script);
 }

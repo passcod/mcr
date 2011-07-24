@@ -2,8 +2,6 @@
   "script": [
     "lib/dom_parser.js",
     "nl",
-    "LICENSE",
-    "nl",
     "namespace.js",
     "storage.js",
 		"chapter.js",
@@ -16,8 +14,6 @@
     "ver",
     "userjs/head_1.js",
     "int",
-    "nl",
-    "LICENSE",
     "nl",
     "userjs/body.js"
   ],
