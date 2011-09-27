@@ -1,0 +1,14 @@
+MR.net Chapter Reader
+=====================
+
+A hybrid userscript that creates a simple UI for [MR.net](http://mangareader.net)
+to read full chapters. Has several options to customize it to your convenience.
+
+It makes use of [jQuery](http://jquery.com) and [Yek.js](http://passcod.net/yek.js)
+as well as HTML5 technologies to achieve a modern look. As a hybrid userscript, it
+injects itself into the page and thus forsakes advanced chrome privileges. As such,
+it may appear bulky, but it has the advantage of being completely self-contained
+and therefore has very few plugin dependencies: any Greasemonkey-compatible plugin
+can use it, provided the underlying browser is modern enough to render its UI.
+
+It is licensed under MIT and copyright 2011 [Félix Saparelli](http://passcod.net).

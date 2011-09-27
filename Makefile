@@ -1,7 +1,7 @@
 {
   "script": [
     "lib/dom_parser.js",
-    "nl",
+    ">>>newline",
     "namespace.js",
     "storage.js",
 		"chapter.js",
@@ -11,11 +11,10 @@
   ],
   "userjs": [
     "userjs/head_0.js",
-    "ver",
+    ">>>version",
     "userjs/head_1.js",
-    "int",
-    "nl",
+    ">>>newline",
     "userjs/body.js"
   ],
-  "version": "14.00"
+  "version": "0.1"
 }

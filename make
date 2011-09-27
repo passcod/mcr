@@ -19,7 +19,6 @@ include "lib/htmlmin.php";
 include "lib/rest_helper.php";
 
 $makefile = json_decode(file_get_contents('Makefile'), true);
-$internal = date('yz');
 $version  = $makefile['version'];
 
 if (!empty($vals['v'])) {
@@ -41,7 +40,7 @@ Usage: php <?php echo $argv[0]; ?> [OPTIONS]
     -h, --help
        Display this message
     
-    -v, --version=VERSION
+    -v, --version=X.Y[.Z]
        Specify the version number.
     
     -c, --copy=PATH
@@ -56,7 +55,7 @@ Usage: php <?php echo $argv[0]; ?> [OPTIONS]
 }
 
 ob_start();
-passthru('sass --style compressed ui.scss');
+passthru('mkdir -p build; touch build/mcr.js build/mcr.min.js build/mcr.user.js; sass --style compressed ui.scss');
 $css = ob_get_clean();
 
 $data = array(
@@ -76,7 +75,7 @@ $data = array(
 
 $js = "";
 foreach ( $makefile['script'] as $file ) {
-  if ( $file == 'nl' ) {
+  if ( $file == '>>>newline' ) {
     $js .= "\n\n";
   } elseif ($file == 'namespace.js') {
     $js .= str_replace('$data', json_encode($data), file_get_contents('namespace.js'));
@@ -123,12 +122,10 @@ $jse = json_encode(file_get_contents('build/mcr.min.js'));
 $userjs = "";
 
 foreach ( $makefile['userjs'] as $file ) {
-  if ( $file == 'nl' ) {
+  if ( $file == '>>>newline' ) {
     $userjs .= "\n\n";
-  } elseif ( $file == 'ver' ) {
+  } elseif ( $file == '>>>version' ) {
     $userjs .= "// @version        ".$version."\n";
-  } elseif ( $file == 'int' ) {
-    $userjs .= "// Internal: v. $version ($internal)\n";
   } elseif ( $file == 'userjs/body.js' ) {
     $userjs .= str_replace('$scrfile', $jse, file_get_contents($file));
   } else {
