@@ -1,0 +1,1 @@
+window.MCR = $data;
