@@ -6,6 +6,7 @@ TOOLS_DIR = lib/
 RES_DIR   = ui/
 
 FILES     = ${BUILD_DIR}jquery.js\
+            ${BUILD_DIR}yek.js\
 						${BUILD_DIR}resources.js\
 						${SRC_DIR}domparser.js\
 						${SRC_DIR}storage.js\
@@ -71,6 +72,9 @@ prepare_env:
 	
 	# Download jQuery
 	wget -O ${BUILD_DIR}jquery.js http://code.jquery.com/jquery-latest.js
+	
+	# Download Yek.js
+	wget -O ${BUILD_DIR}yek.js https://github.com/passcod/yek.js/raw/master/yek.js
 
 
 mcr.js: ${FILES}
