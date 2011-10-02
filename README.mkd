@@ -12,3 +12,18 @@ and therefore has very few plugin dependencies: any Greasemonkey-compatible plug
 can use it, provided the underlying browser is modern enough to render its UI.
 
 It is licensed under MIT and copyright 2011 [Félix Saparelli](http://passcod.net).
+
+Libraries used
+--------------
+
+ * __Yek.js__: A simple hotkey library
+ * __Storage.js__: A thin wrapper around localStorage for easier access
+ * __jQuery__: No description needed :)
+
+Make details
+------------
+
+`make`ing the project notably requires a working web connection (to download the
+above libraries) and a PHP5 CLI install on your PATH (called using `php`). It also
+requires a Java runtime (either Sun/Oracle or OpenJDK) to run Google's Closure
+Compiler.

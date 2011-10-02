@@ -7,12 +7,9 @@ RES_DIR   = ui/
 
 FILES     = ${BUILD_DIR}jquery.js\
             ${BUILD_DIR}yek.js\
+						${BUILD_DIR}storage.js\
 						${BUILD_DIR}resources.js\
 						${SRC_DIR}domparser.js\
-						${SRC_DIR}storage.js\
-						${SRC_DIR}chapter.js\
-						${SRC_DIR}manga.js\
-						${SRC_DIR}ui.js\
 						${SRC_DIR}init.js
 
 RESOURCES = ${RES_DIR}home.png\
@@ -75,6 +72,9 @@ prepare_env:
 	
 	# Download Yek.js
 	wget -O ${BUILD_DIR}yek.js https://github.com/passcod/yek.js/raw/master/yek.js
+	
+	# Download Storage.js
+	wget -O ${BUILD_DIR}storage.js https://github.com/passcod/storage.js/raw/master/storage.js
 
 
 mcr.js: ${FILES}

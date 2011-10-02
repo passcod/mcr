@@ -1,33 +1,37 @@
 $(function (){
   document.onkeydown = function() {};
   
-  /**
-   * Parses the current URL to extract information:
-   * manga name, chapter number, page number
-   *
-   * @return {Array} Resulting info.
-   */
-  var parseURL = function () {
-    var U = {},
-      url_str = window.location.href,
-      Ro = /mangareader\.net\/[0-9]+\-[0-9]+\-([0-9]+)\/([a-z0-9\-]+)\/chapter-([0-9]+)\.html?/i.exec(url_str), // Old
-      Rn = /mangareader\.net\/([a-z0-9\-]+)(\/[0-9]+)?(\/[0-9]+)?/i.exec(url_str), // New
-      ss = /[\/]/; // Slash-stripper
-
-    if ( Ro !== null ) {
-      U.page    = Ro[1] ? Number(Ro[1].replace(ss, '')) : null;
-      U.manga   = Ro[2] ?        Ro[2].replace(ss, '')  : null;
-      U.chapter = Ro[3] ? Number(Ro[3].replace(ss, '')) : null;
-    } else if ( Rn !== null ) {
-      U.manga   = Rn[1] ?        Rn[1].replace(ss, '')  : null;
-      U.chapter = Rn[2] ? Number(Rn[2].replace(ss, '')) : null;
-      U.page    = Rn[3] ? Number(Rn[3].replace(ss, '')) : null;
-    } else {
-      return null;
-    }
-
-    return U;
-  };
+  $('head').append("<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic&v2' rel='stylesheet'>");
+  $('head').append("<style>"+MCResources.css+"</style>");
+  $('body').html(MCResources.html);
   
-  Ui.init();
+  var icons = ['home', 'info', 'options', 'hotkeys', 'favs', 'previous', 'next'];
+  for (var i in icons) {
+    $('.'+icons[i]+'-icon').attr('src', 'data:image/png;base64,'+MCResources[icons[i]]);
+  }
+  
+  $('body > aside .close').click(function() {
+    $(this).hide('fast');
+    location.hash = '';
+  });
+  
+  $(window).bind('hashchange', function() {
+    var h = location.hash;
+    
+    if (h == '#info') {
+      $('body > aside').hide('fast');
+      $('body > aside#info').show('fast');
+    } else if (h == '#options') {
+      $('body > aside').hide('fast');
+      $('body > aside#options').show('fast');
+    } else if (h == '#hotkeys') {
+      $('body > aside').hide('fast');
+      $('body > aside#hotkeys').show('fast');
+    } else if (h == '#favs') {
+      $('body > aside').hide('fast');
+      $('body > aside#favs').show('fast');
+    } else {
+      $('body > aside').hide('fast');
+    }
+  });
 });
