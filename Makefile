@@ -1,9 +1,11 @@
 VERSION   = `cat VERSION`
 BUILD_DIR = build/
 UJS_DIR   = userjs/
-SRC_DIR   = src/
+SRC_DIR   = core/
 TOOLS_DIR = lib/
 RES_DIR   = ui/
+
+ADAPTER   = adapters/mrnet/
 
 FILES     = ${BUILD_DIR}jquery.js\
             ${BUILD_DIR}yek.js\
