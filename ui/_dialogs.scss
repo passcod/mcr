@@ -1,0 +1,26 @@
+body > aside {
+  display: none;
+  position: absolute;
+  top: 2em;
+  left: 25%;
+  width: 50%;
+  min-height: 10em;
+  border: 0.2em solid #222;
+  border-radius: 0.5em;
+  background-color: rgba(17,17,17,0.8);
+  padding: 1em;
+  
+  .close {
+    float: right;
+    position: relative;
+    top: -1.1em;
+    left: 0.9em;
+    color: grey;
+    
+    @include css3(transition, color 200ms);
+    
+    &:hover {
+      color: red;
+    }
+  }
+}

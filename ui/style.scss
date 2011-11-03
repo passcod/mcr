@@ -1,0 +1,27 @@
+@import "reset";
+
+body {
+  font-family: 'Open Sans', Helvetica, sans-serif;
+  background-color: #111;
+  cursor: default;
+  color: white;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  
+  &:hover, &:focus {
+    border-bottom: 1px dashed white;
+  }
+  
+  img {
+    vertical-align: middle;
+  }
+}
+
+@import "chapter";
+@import "menu";
+@import "dialogs";

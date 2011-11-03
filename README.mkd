@@ -1,0 +1,42 @@
+[Meta] Chapter Reader
+=====================
+
+A hybrid userscript that creates a simple UI for manga sites to read full chapters.
+
+It makes use of [jQuery](http://jquery.com) and [Yek.js](http://passcod.net/yek.js)
+as well as HTML5 technologies to achieve a modern look. As a hybrid userscript, it
+injects itself into the page and thus forsakes advanced chrome privileges. As such,
+it may appear bulky, but it has the advantage of being completely self-contained
+and therefore has very few plugin dependencies: any Greasemonkey-compatible plugin
+can use it, provided the underlying browser is modern enough to render its UI.
+
+It is licensed under MIT and copyright 2011 [Félix Saparelli](http://passcod.net).
+Google's Closure Compiler is copyright Google.
+
+Adapters
+--------
+
+MCR is divided into the 'core' and an 'adapter'. The core contains the UI, UX,
+and implements the base logic. The adapter contains the chapter logic: it queries
+the target website for:
+
+ * Information about the manga we want to read (author, description, etc)
+ * __URLs of the images for each page for the wanted chapter__ (required)
+ * A list of all manga available on the site (optionally)
+
+Using that architecture, we'll be able to easily create and maintain adapters for
+many different manga sites and still have that uniform experience across all.
+
+Libraries used
+--------------
+
+ * __Yek.js__: A simple hotkey library
+ * __Storage.js__: A thin wrapper around localStorage for easier access
+ * __jQuery__: No description needed :)
+
+Make details
+------------
+
+`make`ing the project notably requires a PHP5 CLI install on your PATH
+(called using `php`). It also requires a Java runtime (either Sun/Oracle
+or OpenJDK) to run Google's Closure Compiler.
