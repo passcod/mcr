@@ -2,9 +2,8 @@
 // @name           Manga ChapterReader
 // @description    Displays full chapters from MR.net in a simple interface.
 // @author         Félix Saparelli
-// @license        MIT <http://mit.passcod.net>
+// @license        MIT <http://passcod.mit-license.org>
 // @version        15
-// @namespace      http://passcod.net/mcr
 // @include        http://www.mangareader.net/*
 // @include        http://mangareader.net/*
 // ==/UserScript==
